@@ -1,2 +1,3 @@
-# burn_severity_analysis
-Data and analysis pipeline for BC burn severity analysis
+# BC burn severity analysis 
+
+This repository hosts a `targets` pipeline for data production and analyses.
