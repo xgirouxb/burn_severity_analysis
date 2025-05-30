@@ -31,6 +31,11 @@ list(
   # -------------------------------------------------------------------------- #
   # Importing data required for pipeline
   
+  # Define study area as BC admin boundaries
+  tar_target(
+    name = study_area,
+    command = define_study_area()
+  ),
   # Import burn sample points from raw BC fire dataset (MGH)
   tar_target(
     name = burn_sample_points,
