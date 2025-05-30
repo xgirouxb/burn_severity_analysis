@@ -36,6 +36,11 @@ list(
     name = study_area,
     command = define_study_area()
   ),
+  # Import BC fire larger than > 1000 hectares in study years from NBAC archive
+  tar_target(
+    name = study_fires,
+    command = define_study_fires(study_area, study_years)
+  ),
   # Import burn sample points from raw BC fire dataset (MGH)
   tar_target(
     name = burn_sample_points,
