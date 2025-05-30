@@ -8,6 +8,36 @@ is_url <- function(string) {
   stringr::str_detect(string, "https|http|ftp")
 }
 
+#' List URL subdirectories available in URL directory
+#'
+#' @param url A URL string
+#' @param match_string A string to subset matching directories
+#'
+#' @return A list of subdirectory URLs
+#'
+get_url_list <- function(url, match_string = NULL){
+  
+  # Check if supplied URL string is valid
+  if(!is_url(url)) { stop("Invalid URL") }
+  
+  # List URL subdirectories available in URL directory
+  list_subdir <- rvest::read_html(url) %>%
+    # Parse subdirectory URLS
+    rvest::html_nodes("a") %>% 
+    rvest::html_attr("href")
+  
+  # Subset subdirectories of interest 
+  if(!is.null(match_string)) {
+    list_subdir <- stringr::str_subset(list_subdir, pattern = match_string)
+  }
+  
+  # Construct subdirectory URL
+  url_list <- paste0(url, list_subdir)
+  
+  # Return
+  url_list
+}
+
 #' Download and unzip archives from a URL to local temporary directory
 #'
 #' @param archive_url A URL string with the address of the archived file.
