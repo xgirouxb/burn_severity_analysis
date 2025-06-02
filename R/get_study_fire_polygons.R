@@ -1,21 +1,15 @@
-get_study_fire_polygons <- function(study_area, study_years){
+get_study_fire_polygons <- function(study_area, study_years) {
   
   # Get NBAC archive URLs for study years
   list_nbac_subdir <- purrr::map(
-    .x = study_years,
-    .f = ~{get_url_list(url = url_nbac_archive, match_string = paste0(.x))
-    }
+      .x = study_years,
+      .f = ~{get_url_list(url = url_nbac_archive, match_string = paste0(.x))}
   )
   
   # Get NBAC fire polygons that intersect with study area
   list_nbac_fire_polygons <- purrr::map(
     .x = list_nbac_subdir,
-    .f = ~{
-      get_sf_from_source(
-        sf_source = .x,
-        sf_aoi = study_area
-      )
-    }
+    .f = ~{get_sf_from_source(sf_source = .x, sf_aoi = study_area)}
   )
   
   # Bind list to single sf obj of fire polygons
@@ -29,5 +23,4 @@ get_study_fire_polygons <- function(study_area, study_years){
   
   # Return 
   return(nbac_fire_polygons)
-  
 }

@@ -72,7 +72,13 @@ get_archive_from_url <- function(archive_url) {
 #' 
 #' @return An sf object, projected and filtered to aoi if specified.
 #'
-get_sf_from_source <- function(sf_source, proj = study_proj, sf_aoi = NULL, sf_glob = "*.shp", file = NULL) {
+get_sf_from_source <- function(
+    sf_source,
+    proj = study_proj,
+    sf_aoi = NULL,
+    sf_glob = "*.shp",
+    file = NULL
+) {
   
   # If the provided source is a URL, download and unzip to local temp directory
   if(is_url(sf_source)) { sf_source <- get_archive_from_url(sf_source) }

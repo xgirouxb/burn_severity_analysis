@@ -1,4 +1,4 @@
-define_study_area <- function(){
+define_study_area <- function() {
   
   # Import StatCan admin boundaries
   statcan_admin_bounds <- get_sf_from_source(
