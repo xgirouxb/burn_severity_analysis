@@ -29,17 +29,17 @@ tar_source()
 
 list(
   # -------------------------------------------------------------------------- #
-  # Importing data required for pipeline
+  # Import study area fires and samples for pipeline 
   
   # Define study area as BC admin boundaries
   tar_target(
     name = study_area,
     command = define_study_area()
   ),
-  # Import BC fire larger than > 1000 hectares in study years from NBAC archive
+  # Import BC fire larger than 1000 hectares in study years from NBAC archive
   tar_target(
-    name = study_fires,
-    command = define_study_fires(study_area, study_years)
+    name = study_fire_polygons,
+    command = get_study_fire_polygons(study_area, study_years)
   ),
   # Import burn sample points from raw BC fire dataset (MGH)
   tar_target(
