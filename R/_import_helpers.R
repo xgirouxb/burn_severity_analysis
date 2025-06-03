@@ -32,10 +32,10 @@ get_url_list <- function(url, match_string = NULL){
   }
   
   # Construct subdirectory URL
-  url_list <- paste0(url, list_subdir)
+  url_list <- rvest::url_absolute(list_subdir, url)
   
   # Return
-  url_list
+  return(url_list)
 }
 
 #' Download and unzip archives from a URL to local temporary directory
