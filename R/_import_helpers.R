@@ -53,10 +53,10 @@ get_archive_from_url <- function(archive_url) {
   temp_zip <- tempfile(); temp_unzipped <- tempfile()
   
   # Download zipped archive from URL
-  download.file(archive_url, destfile = temp_zip, quiet = TRUE)
+  download.file(archive_url, destfile = temp_zip, quiet = TRUE, mode = "wb")
   
   # Unzip to second temp directory
-  unzip(temp_zip, exdir = temp_unzipped)
+  archive::archive_extract(temp_zip, dir = temp_unzipped)
   
   # Return temp directory
   return(temp_unzipped)
