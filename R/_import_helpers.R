@@ -90,8 +90,8 @@ get_sf_from_source <- function(
   
   # Read simple feature object
   sf_obj <- sf::read_sf(sf_path) %>%
-    # Project if sf crs doesn't match with study crs
-    { if (st_crs(.) != st_crs(proj)) st_transform(., proj) else . }
+    # Reproject if sf crs doesn't match with study projection
+    { if (sf::st_crs(.) != sf::st_crs(proj)) sf::st_transform(., proj) else . }
   
   # Filter to area of interest bounds
   if(!is.null(sf_aoi)) {
