@@ -18,7 +18,7 @@ is_url <- function(string) {
 get_url_list <- function(url, match_string = NULL){
   
   # Check if supplied URL string is valid
-  if(!is_url(url)) { stop("Invalid URL") }
+  if (!is_url(url)) { stop("Invalid URL") }
   
   # List URL subdirectories available in URL directory
   list_subdir <- rvest::read_html(url) %>%
@@ -27,7 +27,7 @@ get_url_list <- function(url, match_string = NULL){
     rvest::html_attr("href")
   
   # Subset subdirectories of interest 
-  if(!is.null(match_string)) {
+  if (!is.null(match_string)) {
     list_subdir <- stringr::str_subset(list_subdir, pattern = match_string)
   }
   
@@ -47,7 +47,7 @@ get_url_list <- function(url, match_string = NULL){
 get_archive_from_url <- function(archive_url) {
   
   # Check if supplied URL string is valid
-  if(!is_url(archive_url)) { stop("Invalid URL") }
+  if (!is_url(archive_url)) { stop("Invalid URL") }
   
   # Create temp folders
   temp_zip <- tempfile(); temp_unzipped <- tempfile()
@@ -81,7 +81,7 @@ get_sf_from_source <- function(
 ) {
   
   # If the provided source is a URL, download and unzip to local temp directory
-  if(is_url(sf_source)) { sf_source <- get_archive_from_url(sf_source) }
+  if (is_url(sf_source)) { sf_source <- get_archive_from_url(sf_source) }
   
   # Get local path to vector layer of interest
   sf_path <- sf_source %>% 
@@ -94,7 +94,7 @@ get_sf_from_source <- function(
     { if (sf::st_crs(.) != sf::st_crs(proj)) sf::st_transform(., proj) else . }
   
   # Filter to area of interest bounds
-  if(!is.null(sf_aoi)) {
+  if (!is.null(sf_aoi)) {
     sf_obj <- sf_obj %>% 
       # Remove M in XYM geometries if present (avoids sf complaints)
       sf::st_zm() %>%
@@ -103,10 +103,12 @@ get_sf_from_source <- function(
   }
   
   # Write to file if argument is provided
-  if(!is.null(file)) {
+  if (!is.null(file)) {
     
     # Create directory if it doesn't exist
-    if(!fs::dir_exists(fs::path_dir(file))) {fs::dir_create(fs::path_dir(file))}
+    if (!fs::dir_exists(fs::path_dir(file))) { 
+      fs::dir_create(fs::path_dir(file))
+    }
     
     # Write to file
     suppressWarnings(sf::write_sf(obj = sf_obj, dsn = file, quiet = TRUE))
