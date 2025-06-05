@@ -26,7 +26,7 @@ get_study_fire_polygons <- function(study_area, study_years) {
     dplyr::group_by(fire_id) %>%
     dplyr::summarize(
       fire_id = dplyr::first(fire_id),
-      year = dplyr::first(YEAR),
+      fire_year = dplyr::first(YEAR),
       start_date = dplyr::first(HS_SDATE),
       end_date = dplyr::first(HS_EDATE),
       burn_area_ha = sum(POLY_HA),
