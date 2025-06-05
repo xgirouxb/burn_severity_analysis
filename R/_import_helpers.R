@@ -41,25 +41,31 @@ get_url_list <- function(url, match_string = NULL){
 #' Download and unzip archives from a URL to local temporary directory
 #'
 #' @param archive_url A URL string with the address of the archived file.
+#' @param output_dir An output directory where the zip is extracted. It can be
+#'                   useful to supply this for large files so they avoid
+#'                   garbage collection in temp folders.
 #'
 #' @return A string with the local directory where the unzipped file is cached.
 #'
-get_archive_from_url <- function(archive_url) {
+get_archive_from_url <- function(archive_url, output_dir = NULL) {
   
   # Check if supplied URL string is valid
   if (!is_url(archive_url)) { stop("Invalid URL") }
   
-  # Create temp folders
-  temp_zip <- tempfile(); temp_unzipped <- tempfile()
+  # Create temp folder for download
+  temp_zip <- tempfile()
+  
+  # Create output directory, use temp folder if output_dir is not supplied
+  fs::dir_create(output_dir <- output_dir %||% tempfile())
   
   # Download zipped archive from URL
   download.file(archive_url, destfile = temp_zip, quiet = TRUE, mode = "wb")
   
   # Unzip to second temp directory
-  archive::archive_extract(temp_zip, dir = temp_unzipped)
+  archive::archive_extract(temp_zip, dir = output_dir)
   
-  # Return temp directory
-  return(temp_unzipped)
+  # Return temp directory or supplied output directory 
+  return(output_dir)
 }
 
 #' Read and filter simple features layers from a local temp directory or URL
