@@ -6,9 +6,8 @@
 .Rprofile
 
 # Project data inputs (cache and scrath) and ouputs
-data/_cache/
-data/_scratch/
-data/raw_burn_data/
+data/**
+!data/*
 outputs/
 
 # Notebooks in .html, .md, or recycled
