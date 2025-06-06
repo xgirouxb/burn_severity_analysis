@@ -53,12 +53,13 @@ get_vri_polygons <- function(study_fire_polygons, vri_lyr_name) {
                 sf::st_read(
                   # Get the VRI gdb in cache that matches layer name
                   dsn = stringr::str_subset(fs::dir_ls(vri_cache), vri_lyr_name),
-                  layer = vri_lyr_name,
                   # Spatial query using WKT 
                   wkt_filter = sf::st_as_text(sf::st_geometry(.x)),
                   # Silence outputs
                   quiet = TRUE
-                )
+                ) %>% 
+                  # Add fire_id as field
+                  dplyr::mutate(fire_id = .x$fire_id)
               }
             ) %>% 
             # Bind rows for single output sf
@@ -74,7 +75,7 @@ get_vri_polygons <- function(study_fire_polygons, vri_lyr_name) {
     # Get list of fire polygons
     dplyr::pull(sf_poly) %>% 
     # Bind_rows
-    dplyr::bind_rows() 
+    dplyr::bind_rows()
   
   # Return
   return(vri_polygons)
