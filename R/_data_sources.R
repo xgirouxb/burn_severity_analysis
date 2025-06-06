@@ -18,3 +18,8 @@ path_fire_data <- "data/raw_burn_data/BCfiresDF.csv"
 # VRI - Historical Vegetation Resource Inventory (2002 - 2023)
 # Metadata available at: https://catalogue.data.gov.bc.ca/dataset/vri-historical-vegetation-resource-inventory-2002-2023-
 url_vri_archive <- "https://pub.data.gov.bc.ca/datasets/02dba161-fdb7-48ae-a4bb-bd6ef017c36d/"
+
+# ---------------------------------------------------------------------------- #
+# VRI - Table with species code keys for VRI leading species
+# Extracted from p.214 : https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/forestry/stewardship/forest-analysis-inventory/data-management/standards/vegcomp_poly_rank1_data_dictionaryv5_2019.pdf
+path_vri_species_key <- "data/vri_species_key/vri_species_key.csv"

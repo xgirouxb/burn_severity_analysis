@@ -41,7 +41,12 @@ list(
     name = study_fire_polygons,
     command = get_study_fire_polygons(study_area, study_years)
   ),
-  # Import VRI R1 polygons for study years and fires
+  # Import VRI leading species key
+  tar_target(
+    name = vri_species_key,
+    command = readr::read_csv(path_vri_species_key),
+    format = "file"
+  ),
   # Import VRI Rank 1 layer polygons for study years and fires
   tar_target(
     name = vri_r1_polygons,
