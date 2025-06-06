@@ -22,4 +22,4 @@ url_vri_archive <- "https://pub.data.gov.bc.ca/datasets/02dba161-fdb7-48ae-a4bb-
 # ---------------------------------------------------------------------------- #
 # VRI - Table with species code keys for VRI leading species
 # Extracted from p.214 : https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/forestry/stewardship/forest-analysis-inventory/data-management/standards/vegcomp_poly_rank1_data_dictionaryv5_2019.pdf
-path_vri_species_key <- "data/vri_species_key/vri_species_key.csv"
+path_vri_species_key <- "data/vri_species_key.csv"
