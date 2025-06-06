@@ -44,8 +44,7 @@ list(
   # Import VRI leading species key
   tar_target(
     name = vri_species_key,
-    command = readr::read_csv(path_vri_species_key),
-    format = "file"
+    command = readr::read_csv(path_vri_species_key, show_col_types = FALSE)
   ),
   # Import VRI Rank 1 layer polygons for study years and fires
   tar_target(
