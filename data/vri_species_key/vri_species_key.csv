@@ -1,0 +1,119 @@
+vri_species_code,category,subcategory,native,commercial,common_name,latin_genus,latin_species,latin_subspecies,variety,latin_label
+A,Deciduous,Poplar,Yes,Yes,"Poplar, Aspen, and Cottonwood",Populus,,,,Populus spp.
+AC,Deciduous,Poplar,Yes,Yes,Balsam poplar,Populus,balsamifera,,,Populus balsamifera 
+ACB,Deciduous,Poplar,Yes,Yes,Balsam poplar,Populus,balsamifera,balsamifera,,Populus balsamifera balsamifera
+ACT,Deciduous,Poplar,Yes,Yes,Black cottonwood,Populus,balsamifera,trichocarpa,,Populus balsamifera trichocarpa
+AD,Deciduous,Poplar,No,No,Southern cottonwood,Populus,deltoides,,,Populus deltoides
+AT,Deciduous,Poplar,Yes,Yes,Aspen,Populus,tremuloides,,,Populus tremuloides
+AX,Deciduous,Poplar,Yes,Yes,Hybrid poplars,Populus,,,,Populus x spp.
+B,Coniferous,Fir,Yes,Yes,True fir ,Abies,,,,Abies spp.
+BA,Coniferous,Fir,Yes,Yes,Amabalis fir,Abies,amabalis,,,Abies amabalis
+BB,Coniferous,Fir,No,No,Balsam fir,Abies,balsamea,,,Abies balsamea
+BC,Coniferous,Fir,No,No,White fir,Abies ,concolor,,,Abies concolor
+BG,Coniferous,Fir,Yes,Yes,Grand fir,Abies,grandis,,,Abies grandis
+BI,Coniferous,Fir,Yes,Yes,Subalpine fir,Abies,lasiocarpa,,,Abies lasiocarpa
+BL,Coniferous,Fir,Yes,Yes,Alpine fir,Abies,lasiocarpa,,,Abies lasiocarpa
+BM,Coniferous,Fir,No,No,Shasta red fir,Abies,magnifica,,shastensis,Abies magnifica var. shastensis
+BP,Coniferous,Fir,No,No,Noble fire,Abies,procera,,,Abies procera
+C,Coniferous,Cedar,Yes,Yes,Cedar,Thuja ,,,,Thuja spp.
+CW,Coniferous,Cedar,Yes,Yes,Western red cedar,Thuja ,plicata,,,Thuja plicata
+D,Deciduous,Alder,Yes,Yes,Alder,Alnus,,,,Alnus spp.
+DM,Deciduous,Alder,Yes,No,Mountain alder,Alnus,incana,,,Alnus incana
+DR,Deciduous,Alder,Yes,Yes,Red alder ,Alnus,rubra,,,Alnus rubra
+E ,Deciduous,Birch,Yes,Yes,Birch,Betula,,,,Betula spp.
+EA,Deciduous,Birch,Yes,Yes,Alaska paper birch,Betula,neoalaskansa,,,Betula neoalaskansa
+EE,Deciduous,Birch,No,No,European birch,Betula,pendula,,,Betula pendula
+EP,Deciduous,Birch,Yes,Yes,Common paper birch,Betula,papyrifera,,,Betula papyrifera
+ES,Deciduous,Birch,No,No,Silver birch,Betula,pubescens,,,Betula pubescens
+EW,Deciduous,Birch,Yes,No,Water birch,Betula,occidentalis,,,Betula occidentalis
+EXP,Deciduous,Birch,Yes,Yes,Alaska x paper birch hybrid,Betula,x winteri,,,Betula x winteri
+EY,Deciduous,Birch,No,No,Yellow birch,Betula,alleghaniensis,,,Betula alleghaniensis
+F,Coniferous,Douglas-fir,Yes,Yes,Douglas-fir ,Pseudotsuga ,,,,Pseudotsuga spp.
+FD,Coniferous,Douglas-fir,Yes,Yes,Douglas-fir,Pseudotsuga ,menziesii,,,Pseudotsuga menziesii
+FDC,Coniferous,Douglas-fir,Yes,Yes,Castal Douglas-fir,Pseudotsuga ,menziesii,,menziesii,Pseudotsuga menziesii var. menziesii
+FDI,Coniferous,Douglas-fir,Yes,Yes,Interior Douglas-fir,Pseudotsuga ,menziesii,,glauca,Pseudotsuga menziesii var. glauca
+G,Deciduous,Dogwood,Yes,No,Dogwood,Cornus,,,,Cornus spp.
+GP,Deciduous,Dogwood,Yes,No,Pacific dogwood,Cornus,nuttallii,,,Cornus nuttallii
+H,Coniferous,Hemlock,Yes,Yes,Hemlock,Tsuga,,,,Tsuga spp.
+HM,Coniferous,Hemlock,Yes,Yes,Mountain hemlock,Tsuga,mertensiana,,,Tsuga mertensiana
+HW,Coniferous,Hemlock,Yes,Yes,Western hemlock,Tsuga,heterophylla,,,Tsuga heterophylla
+HXM,Coniferous,Hemlock,Yes,Yes,Mountain x western hemlock hybrid,Tsuga,mertensiana x heterophylla,,,Tsuga mertensiana x heterophylla
+J ,Coniferous,Juniper,Yes,No,Juniper,Juniperus,,,,Juniperus spp.
+JR,Coniferous,Juniper,Yes,No,Rocky Mountain juniper,Juniperus,scopulorum,,,Juniperus scopulorum
+K,Deciduous,Cascara,Yes,No,Cascara,Rhamnus,,,,Rhamnus spp.
+KC,Deciduous,Cascara,Yes,No,Cascara,Rhamnus,purshiana,,,Rhamnus purshiana
+L,Coniferous,Larch,Yes,Yes,Larch,Larix,,,,Larix spp.
+LA,Coniferous,Larch,Yes,Yes,Alpine larch,Larix,lyalli,,,Larix lyalli
+LD,Coniferous,Larch,No,No,Dahurian larch,Larix,gmelinii,,,Larix gmelinii
+LT,Coniferous,Larch,Yes,Yes,Tamarack,Larix,laricina,,,Larix laricina
+LW,Coniferous,Larch,Yes,Yes,Western larch,Larix,occidentalis,,,Larix occidentalis
+M,Deciduous,Maple,Yes,Yes,Maple,Acer,,,,Acer spp.
+MB ,Deciduous,Maple,Yes,Yes,Broadleaf maple,Acer,macrophyllum,,,Acer macrophyllum
+ME,Deciduous,Maple,No,No,Box elder,Acer,negundo,,,Acer negundo
+MN,Deciduous,Maple,No,No,Norway maple,Acer,platanoides,,,Acer platanoides
+MS,Deciduous,Maple,No,No,Sycamore maple,Acer,pseudoplatanus,,,Acer pseudoplatanus
+MV,Deciduous,Maple,Yes,No,Vine maple,Acer,circinatum,,,Acer circinatum
+OA,Coniferous,Cedar,No,No,Incense-cedar,Calocedrus,decurrens,,,Calocedrus decurrens
+OB,Coniferous,Sequoia,No,No,Giant sequoia,Sequoiadendron,giganteum,,,Sequoiadendron giganteum
+OC,Coniferous,Sequoia,No,No,Coast redwood,Sequoia,sempervirens,,,Sequoia sempervirens
+OD,Deciduous,Ash,No,No,European mountain-ash,Sorbus,aucuparia,,,Sorbus aucuparia
+OE,Deciduous,Elm,No,No,Siberian elm,Ulmus,pumila,,,Ulmus pumila
+OF,Deciduous,Pear,No,No,Common pear,Pyrus,communis,,,Pyrus communis
+OF,Deciduous,Ash,No,No,Oregon ash,Fraxinus,latifolia,,,Flaxinus latifolia
+OH,Deciduous,Ash,No,No,White ash,Fraxinus,americana,,,Fraxinus americana
+OI,Deciduous,Hickory,No,No,Shagbark hickory,Carya,ovata,,,Carya ovata
+P,Coniferous,Pine,Yes,Yes,Pine,Pinus,,,,Pinus spp.
+PA,Coniferous,Pine,Yes,Yes,Whitebark pine,Pinus,albicalis,,,Pinus albicalis
+PF,Coniferous,Pine,Yes,Yes,Limber pine,Pinus,flexilis,,,Pinus flexilis
+PJ,Coniferous,Pine,Yes,Yes,Jack pine,Pinus,banksiana,,,Pinus banksiana
+PL,Coniferous,Pine,Yes,Yes,Lodgepole pine,Pinus,contorta,,,Pinus contorta
+PLC,Coniferous,Pine,Yes,Yes,Shore pine,Pinus,contorta,,,Pinus contorta var. contorta 
+PLI,Coniferous,Pine,Yes,Yes,Lodgepole pine,Pinus,contorta,,,Pinus contorta var. latifolia
+PM,Coniferous,Pine,No,No,Monterey pine,Pinus,radiata,,,Pinus radiata
+PR,Coniferous,Pine,No,No,Red pine,Pinus,resinosa,,,Pinus resinosa
+PS,Coniferous,Pine,No,No,Sugar pine,Pinus,lambertiana,,,Pinus lambertiana
+PW,Coniferous,Pine,Yes,Yes,Western white pine,Pinus,monticola,,,Pinus monticola
+PXJ,Coniferous,Pine,Yes,Yes,Lodgepole x jack pine hybrid,Pinus,x murraybanksiana,,,Pinus x murraybanksiana
+PY,Coniferous,Pine,Yes,Yes,Ponderosa,Pinus,ponderosa,,,Pinus ponderosa
+Q,Deciduous,Oak,Yes,No,Oak,Quercus,,,,Quercus spp.
+QE,Deciduous,Oak,No,No,English oak,Quercus,robur,,,Quercus robur
+QG,Deciduous,Oak,Yes,No,Garry oak,Quercus,garryana,,,Quercus garryana
+QW,Deciduous,Oak,No,No,White oak,Quercus,alba,,,Quercus alba
+R,Deciduous,Arbutus,Yes,No,Arbutus ,Arbutus ,,,,Arbutus spp.
+RA,Deciduous,Arbutus,Yes,No,Arbutus ,Arbutus ,menziesii,,,Arbutus menziesii
+S,Coniferous,Spruce,Yes,Yes,Spruce,Picea,,,,Picea spp.
+SB,Coniferous,Spruce,Yes,Yes,Black spruce,Picea,mariana,,,Picea mariana
+SE,Coniferous,Spruce,Yes,Yes,Engelmann spruce,Picea,engelmannii,,,Picea engelmannii
+SN,Coniferous,Spruce,No,No,Norway spruce,Picea,abies,,,Picea abies
+SS,Coniferous,Spruce,Yes,Yes,Sitka spruce,Picea,sitchensis,,,Picea sitchensis
+SW,Coniferous,Spruce,Yes,Yes,White spruce,Picea,glauca,,,Picea glauca
+SX,Coniferous,Spruce,Yes,Yes,Spruce hybrid,Picea,,,,Picea x spp.
+SXL,Coniferous,Spruce,Yes,Yes,Sitka x white spruce hybrid,Picea,x lutzii,,,Picea x lutzii
+SXS,Coniferous,Spruce,Yes,Yes,Sitka x unknown spruce hybrid,Picea,sitchensis x ?,,,Picea sitchensis x ?
+SXW,Coniferous,Spruce,Yes,Yes,Engelmann x white spruce hybrid,Picea,engelmannii x glauca,,,Picea engelmannii x glauca
+T ,Coniferous,Yew,Yes,No,Yew,Taxus,,,,Taxus spp.
+TW,Coniferous,Yew,Yes,No,Western yew,Taxus,brevifolia,,,Taxus brevifolia
+U,Deciduous,Apple,Yes,No,Apple,Malus ,,,,Malus spp.
+UA,Deciduous,Apple,No,No,Cultivated apple,Malus ,pumila,,,Malus pumila
+UP,Deciduous,Apple,Yes,No,Pacific crab apple,Malus ,fusca,,,Malus fusca
+V,Deciduous,Cherry,Yes,No,Cherry ,Prunus,,,,Prunus spp.
+VB,Deciduous,Cherry,Yes,No,Bitter cherry,Prunus,emarginata,,,Prunus emarginata
+VP ,Deciduous,Cherry,Yes,No,Pin cherry,Prunus ,pensylvanica,,,Prunus pensylvanica
+VS,Deciduous,Cherry,No,No,Sweet cherry,Prunus ,avium,,,Prunus avium
+VV,Deciduous,Cherry,Yes,No,Choke cherry,Prunus,virginiana,,,Prunus virginiana
+W,Deciduous,Willow,Yes,No,Willow,Salix ,,,,Salix spp.
+WA,Deciduous,Willow,Yes,No,Peachleaf willow,Salix ,amygdaloides,,,Salix amygdaloides
+WB ,Deciduous,Willow,Yes,No,Bebb's willow,Salix ,bebbiana,,,Salix bebbiana
+WD,Deciduous,Willow,Yes,No,Pussy willow,Salix ,discolor,,,Salix discolor
+WP,Deciduous,Willow,Yes,No,Pacific willow,Salix ,lucida,,,Salix lucida
+WS,Deciduous,Willow,Yes,No,Scouler's willow,Salix ,scouleriana,,,Salix scouleriana
+WT,Deciduous,Willow,Yes,No,Sitka willow,Salix ,sitchensis,,,Salix sitchensis
+X,Unknown,Unknown,Unknown,No,Unkown,,,,,
+XC,Coniferous,Unknown,Unknown,No,Unknown conifer,,,,,
+XH,Deciduous,Unknown,Unknown,No,Unknown deciduous,,,,,
+Y,Coniferous,Cypress,Yes,Yes,Cypress,Chamaecyparis,,,,Chamaecyparis spp.
+YC,Coniferous,Cypress,Yes,Yes,Yellow cedar,Chamaecyparis,nootkatensis,,,Chamaecyparis nootkatensis
+YP,Coniferous,Cypress,No,No,Port Orford-cedar,Chamaecyparis,lawsoniana,,,Chamaecyparis lawsoniana
+Z ,Other,Other,Unknown,No,Other,,,,,
+ZC,Coniferous,Other,Unknown,No,Other conifer,,,,,
+ZH,Deciduous,Other,Unknown,No,Other deciduous,,,,,
