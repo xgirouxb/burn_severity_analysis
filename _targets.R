@@ -28,6 +28,7 @@ tar_source()
 # Target list
 
 list(
+  
   # -------------------------------------------------------------------------- #
   # Import study area fires and samples for pipeline 
   
@@ -41,10 +42,19 @@ list(
     name = study_fire_polygons,
     command = get_study_fire_polygons(study_area, study_years)
   ),
+  # Track VRI leading species key for any updates on disk
+  tar_target(
+    name = tracked_vri_species_key,
+    command = path_vri_species_key,
+    format = "file"
+  ),
   # Import VRI leading species key
   tar_target(
     name = vri_species_key,
-    command = readr::read_csv(path_vri_species_key, show_col_types = FALSE)
+    command = readr::read_csv(
+      tracked_vri_species_key,
+      show_col_types = FALSE
+    )
   ),
   # Import VRI Rank 1 layer polygons for study years and fires
   tar_target(
