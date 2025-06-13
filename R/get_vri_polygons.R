@@ -65,8 +65,11 @@ get_vri_polygons <- function(study_fire_polygons, vri_lyr_name) {
             # Bind rows for single output sf
             dplyr::bind_rows() %>% 
             # Add fire year 
-            dplyr::mutate(fire_year = .x)
-          
+            dplyr::mutate(fire_year = .x) %>% 
+            # VRI has slop names for geometries, standardize to "geometry"
+            dplyr::rename(geometry = !!attr(., "sf_column")) %>% 
+            sf::st_set_geometry("geometry")
+
           # Return polygons
           sf_poly_year
         }
@@ -75,7 +78,12 @@ get_vri_polygons <- function(study_fire_polygons, vri_lyr_name) {
     # Get list of fire polygons
     dplyr::pull(sf_poly) %>% 
     # Bind_rows
-    dplyr::bind_rows()
+    dplyr::bind_rows() %>% 
+    # Clean up ESRI slop
+    dplyr::select(
+      -dplyr::starts_with("Shape"), -SE_ANNO_CAD_DATA,
+      -GEOMETRY_AREA, -GEOMETRY_LEN, -OBJECTID
+    )
   
   # Return
   return(vri_polygons)
