@@ -81,5 +81,19 @@ list(
   tar_target(
     name = burn_sample_points,
     command = get_bc_burn_sample_points(path_fire_data)
+  ),
+  
+  # -------------------------------------------------------------------------- #
+  # Prepare input data sets for modelling
+  
+  # Prepare and merge VRI R1 and D polygon layers
+  tar_target(
+    name = vri_polygons,
+    command = prep_vri_polygons(
+      vri_r1_polygons,
+      vri_d_polygons,
+      vri_species_key
+    )
   )
+  
 )
