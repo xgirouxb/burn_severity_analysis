@@ -3,8 +3,8 @@ p.214 of the VRI Relational Data Dictionary (version 5.0)
 (https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/forestry/stewardship/forest-analysis-inventory/data-management/standards/vegcomp_poly_rank1_data_dictionaryv5_2019.pdf)
 
 vri_species_code : The codes to identify species in the VRI archive
-category         : "Coniferous" or "Deciduous"
-subcategory      : Common name for genus (e.g., "Poplar", "Fir", "Pine", etc...)
+leaf_habit       : "Coniferous" or "Deciduous"
+common_genus     : Common name for genus (e.g., "Poplar", "Fir", "Pine", etc...)
 native           : "Yes" or "No" --> Is the species native to BC?
 commercial       : "Yes" or "No" --> Is the species commercially harvested? 
                    If the species code is of length 1 (e.g., "A", "B", etc...),

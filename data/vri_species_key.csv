@@ -1,4 +1,4 @@
-vri_species_code,category,subcategory,native,commercial,common_name,latin_genus,latin_species,latin_subspecies,variety,latin_label
+vri_species_code,leaf_habit,common_genus,native,commercial,common_name,latin_genus,latin_species,latin_subspecies,variety,latin_label
 A,Deciduous,Poplar,Yes,Yes,"Poplar, Aspen, and Cottonwood",Populus,,,,Populus spp.
 AC,Deciduous,Poplar,Yes,Yes,Balsam poplar,Populus,balsamifera,,,Populus balsamifera 
 ACB,Deciduous,Poplar,Yes,Yes,Balsam poplar,Populus,balsamifera,balsamifera,,Populus balsamifera balsamifera
@@ -67,14 +67,14 @@ PA,Coniferous,Pine,Yes,Yes,Whitebark pine,Pinus,albicalis,,,Pinus albicalis
 PF,Coniferous,Pine,Yes,Yes,Limber pine,Pinus,flexilis,,,Pinus flexilis
 PJ,Coniferous,Pine,Yes,Yes,Jack pine,Pinus,banksiana,,,Pinus banksiana
 PL,Coniferous,Pine,Yes,Yes,Lodgepole pine,Pinus,contorta,,,Pinus contorta
-PLC,Coniferous,Pine,Yes,Yes,Shore pine,Pinus,contorta,,,Pinus contorta var. contorta 
-PLI,Coniferous,Pine,Yes,Yes,Lodgepole pine,Pinus,contorta,,,Pinus contorta var. latifolia
+PLC,Coniferous,Pine,Yes,Yes,Shore pine,Pinus,contorta,,contorta,Pinus contorta var. contorta 
+PLI,Coniferous,Pine,Yes,Yes,Lodgepole pine,Pinus,contorta,,latifolia,Pinus contorta var. latifolia
 PM,Coniferous,Pine,No,No,Monterey pine,Pinus,radiata,,,Pinus radiata
 PR,Coniferous,Pine,No,No,Red pine,Pinus,resinosa,,,Pinus resinosa
 PS,Coniferous,Pine,No,No,Sugar pine,Pinus,lambertiana,,,Pinus lambertiana
 PW,Coniferous,Pine,Yes,Yes,Western white pine,Pinus,monticola,,,Pinus monticola
 PXJ,Coniferous,Pine,Yes,Yes,Lodgepole x jack pine hybrid,Pinus,x murraybanksiana,,,Pinus x murraybanksiana
-PY,Coniferous,Pine,Yes,Yes,Ponderosa,Pinus,ponderosa,,,Pinus ponderosa
+PY,Coniferous,Pine,Yes,Yes,Ponderosa pine,Pinus,ponderosa,,,Pinus ponderosa
 Q,Deciduous,Oak,Yes,No,Oak,Quercus,,,,Quercus spp.
 QE,Deciduous,Oak,No,No,English oak,Quercus,robur,,,Quercus robur
 QG,Deciduous,Oak,Yes,No,Garry oak,Quercus,garryana,,,Quercus garryana
@@ -108,7 +108,7 @@ WD,Deciduous,Willow,Yes,No,Pussy willow,Salix ,discolor,,,Salix discolor
 WP,Deciduous,Willow,Yes,No,Pacific willow,Salix ,lucida,,,Salix lucida
 WS,Deciduous,Willow,Yes,No,Scouler's willow,Salix ,scouleriana,,,Salix scouleriana
 WT,Deciduous,Willow,Yes,No,Sitka willow,Salix ,sitchensis,,,Salix sitchensis
-X,Unknown,Unknown,Unknown,No,Unkown,,,,,
+X,Unknown,Unknown,Unknown,No,Unknown,,,,,
 XC,Coniferous,Unknown,Unknown,No,Unknown conifer,,,,,
 XH,Deciduous,Unknown,Unknown,No,Unknown deciduous,,,,,
 Y,Coniferous,Cypress,Yes,Yes,Cypress,Chamaecyparis,,,,Chamaecyparis spp.
