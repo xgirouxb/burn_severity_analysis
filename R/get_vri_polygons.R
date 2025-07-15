@@ -1,14 +1,7 @@
-get_vri_polygons <- function(study_fire_polygons, vri_lyr_name) {
-  
-  # Define burn sample area to include outer buffer and all inner skips
-  sample_area <- study_fire_polygons %>%
-    # Delete inner holes (skips/refugia) and islands
-    delete_holes() %>% 
-    # Make a 1000 m buffer
-    sf::st_buffer(1000)
+get_vri_polygons <- function(study_fire_sampling_polygons, vri_lyr_name) {
   
   # Import VRI polygons for layer of interest in sample areas and study years
-  vri_polygons <- sample_area %>% 
+  vri_polygons <- study_fire_sampling_polygons %>% 
     tidyr::nest(.by = fire_year) %>%
     dplyr::mutate(
       sf_poly = purrr::map2(

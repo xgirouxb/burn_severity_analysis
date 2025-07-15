@@ -42,6 +42,11 @@ list(
     name = study_fire_polygons,
     command = get_study_fire_polygons(study_area, study_years)
   ),
+  # Define sampling area for study fires (include 1km and skips/refugia)
+  tar_target(
+    name = study_fire_sampling_polygons,
+    command = sf::st_buffer(delete_holes(study_fire_polygons), 1000)
+  ),
   # Track VRI leading species key for any updates on disk
   tar_target(
     name = tracked_vri_species_key,
@@ -60,7 +65,7 @@ list(
   tar_target(
     name = vri_r1_polygons,
     command = get_vri_polygons(
-      study_fire_polygons,
+      study_fire_sampling_polygons,
       vri_lyr_name = "VEG_COMP_LYR_R1_POLY"
     )
   ),
@@ -68,7 +73,7 @@ list(
   tar_target(
     name = vri_d_polygons,
     command = get_vri_polygons(
-      study_fire_polygons,
+      study_fire_sampling_polygons,
       vri_lyr_name = "VEG_COMP_LYR_D_POLY"
     )
   ),
