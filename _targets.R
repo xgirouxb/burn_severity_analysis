@@ -30,7 +30,7 @@ tar_source()
 list(
   
   # -------------------------------------------------------------------------- #
-  # Import study area fires and samples for pipeline 
+  # Import study area fires, samples for pipeline, and input data sets
   
   # Define study area as BC admin boundaries
   tar_target(
@@ -56,10 +56,7 @@ list(
   # Import VRI leading species key
   tar_target(
     name = vri_species_key,
-    command = readr::read_csv(
-      tracked_vri_species_key,
-      show_col_types = FALSE
-    )
+    command = readr::read_csv(tracked_vri_species_key, show_col_types = FALSE)
   ),
   # Import VRI Rank 1 layer polygons for study years and fires
   tar_target(
