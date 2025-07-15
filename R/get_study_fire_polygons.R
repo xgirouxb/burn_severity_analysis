@@ -27,14 +27,14 @@ get_study_fire_polygons <- function(study_area, study_years) {
     dplyr::summarize(
       fire_id = dplyr::first(fire_id),
       fire_year = dplyr::first(YEAR),
-      start_date = dplyr::first(HS_SDATE),
-      end_date = dplyr::first(HS_EDATE),
-      burn_area_ha = sum(POLY_HA),
+      fire_start_date = dplyr::first(HS_SDATE),
+      fire_end_date = dplyr::first(HS_EDATE),
+      fire_burn_area_ha = sum(POLY_HA),
       geometry = sf::st_union(geometry),
       .groups = "drop"
     ) %>%
     # Retain only fires > 1000 hectares
-    dplyr::filter(burn_area_ha > 1000) %>%
+    dplyr::filter(fire_burn_area_ha > 1000) %>%
     # Fix topology errors
     sf::st_make_valid() %>%
     sf::st_cast("MULTIPOLYGON")
