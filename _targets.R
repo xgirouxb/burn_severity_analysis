@@ -47,6 +47,11 @@ list(
     name = study_fire_sampling_polygons,
     command = sf::st_buffer(delete_holes(study_fire_polygons), 1000)
   ),
+  # Import BC consolidated cutblocks that intersect study fire sampling polygons
+  tar_target(
+    name = cutblock_polygons,
+    command = get_cutblock_polygons(study_fire_sampling_polygons)
+  ),
   # Track VRI leading species key for any updates on disk
   tar_target(
     name = tracked_vri_species_key,
