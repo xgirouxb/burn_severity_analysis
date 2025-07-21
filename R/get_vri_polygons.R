@@ -79,8 +79,8 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
       -dplyr::starts_with("GEOMETRY_"), 
       -dplyr::starts_with("OBJECTID")
     ) %>% 
-    # Cast columns names to lowercase to match metadata
-    dplyr::rename_with(stringr::str_to_lower)
+    # Cast columns names to lowercase to match metadata (except for geometry)
+    dplyr::rename_with(stringr::str_to_lower, .cols = -geometry)
   
   # Return
   return(vri_polygons)
