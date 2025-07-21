@@ -74,9 +74,13 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
     dplyr::bind_rows() %>% 
     # Clean up ESRI slop
     dplyr::select(
-      -dplyr::starts_with("Shape"), -SE_ANNO_CAD_DATA,
-      -GEOMETRY_AREA, -GEOMETRY_LEN, -OBJECTID
-    )
+      -dplyr::starts_with("Shape"), 
+      -dplyr::starts_with("SE_ANNO_CAD"),
+      -dplyr::starts_with("GEOMETRY_"), 
+      -dplyr::starts_with("OBJECTID")
+    ) %>% 
+    # Cast columns names to lowercase to match metadata
+    dplyr::rename_with(stringr::str_to_lower)
   
   # Return
   return(vri_polygons)
