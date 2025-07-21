@@ -15,7 +15,7 @@ get_cutblock_polygons <- function(study_fire_sampling_polygons){
           dplyr::filter(bcdata::INTERSECTS(.x)) %>%
           bcdata::collect() 
         
-        # If there are not cutblocks intersecting fire, return NULL
+        # If there are no cutblocks intersecting fire, return NULL
         if (nrow(cutblocks_retrieved) == 0 ) return(NULL)
         
         # Else add fire IDs and clean up
