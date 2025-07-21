@@ -1,7 +1,7 @@
-get_vri_polygons <- function(study_fire_sampling_polygons, vri_lyr_name) {
+get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
   
   # Import VRI polygons for layer of interest in sample areas and study years
-  vri_polygons <- study_fire_sampling_polygons %>% 
+  vri_polygons <- sf_aoi %>% 
     tidyr::nest(.by = fire_year) %>%
     dplyr::mutate(
       sf_poly = purrr::map2(
@@ -9,13 +9,13 @@ get_vri_polygons <- function(study_fire_sampling_polygons, vri_lyr_name) {
         .y = data,
         .f = ~ {
           
-          # VRI year to sample is year preceding a fire
-          vri_year <- .x - 1
+          # VRI year to sample, default is year preceding a fire
+          vri_year <- .x + year_offset
           
           # Define cache directory for VRI archive, create if it doesn't exist
           vri_cache <- fs::path("data/_cache/vri", vri_year)
           if (!fs::dir_exists(vri_cache)) { fs::dir_create(vri_cache) }
-
+          
           # If VRI cache contains no gdb matching vri_lyr_name...
           if (!any(stringr::str_detect(fs::dir_ls(vri_cache), vri_lyr_name))) {
             
@@ -62,7 +62,7 @@ get_vri_polygons <- function(study_fire_sampling_polygons, vri_lyr_name) {
             # VRI has slop names for geometries, standardize to "geometry"
             dplyr::rename(geometry = !!attr(., "sf_column")) %>% 
             sf::st_set_geometry("geometry")
-
+          
           # Return polygons
           sf_poly_year
         }
