@@ -47,6 +47,11 @@ list(
     name = study_fire_sampling_polygons,
     command = sf::st_buffer(delete_holes(study_fire_polygons), 1000)
   ),
+  # Import burn sample points from raw BC fire dataset (MGH)
+  tar_target(
+    name = burn_sample_points,
+    command = get_bc_burn_sample_points(path_fire_data)
+  ),
   # Import BC consolidated cutblocks that intersect study fire sampling polygons
   tar_target(
     name = cutblock_polygons,
@@ -79,12 +84,17 @@ list(
       vri_lyr_name = "LYR_D"
     )
   ),
-  # Import burn sample points from raw BC fire dataset (MGH)
+  # Import land cover classes sampled via Google Earth Engine
+  # e.g. https://code.earthengine.google.com/d78997162f4707f78ba8ad0f36572e31
   tar_target(
-    name = burn_sample_points,
-    command = get_bc_burn_sample_points(path_fire_data)
+    name = land_cover_class_tbl,
+    command = get_land_cover_class_tbl(
+      burn_sample_points,
+      # Supply vector of radius within which to evaluate land cover proportions
+      neighbourhood_radius = c(100, 500, 1000)
+    )
   ),
-
+  
   # -------------------------------------------------------------------------- #
   # Prepare input data sets for modelling
 
