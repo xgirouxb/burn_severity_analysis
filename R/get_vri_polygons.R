@@ -36,6 +36,38 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
               archive_url = url_vri_year_gdb,
               output_dir = vri_cache
             )
+            
+            # Rename the unzipped VRI geodatabase with consistent naming scheme
+            # (VRI gdb names are sometimes upper, lower, or sentence case)
+            
+            # Fetch list of gdbs currently in cache
+            cached_gdbs <- fs::dir_ls(vri_cache, type = "directory")
+            
+            # Fetch messy VRI naming scheme that matches supplied layer name
+            messy_gdb_name <- cached_gdbs[
+              stringr::str_detect(
+                string = stringr::str_to_lower(fs::path_file(cached_gdbs)),
+                pattern = stringr::str_to_lower(vri_lyr_name)
+              )
+            ]
+            
+            # Sanity check
+            if (length(messy_gdb_name) > 1) { 
+              stop("> 1 matching gdb matches `vri_lyr_name`.") 
+            }
+            
+            # Clean gdb naming scheme
+            clean_gdb_name <- fs::path(
+              vri_cache,
+              paste0(vri_lyr_name, "_", vri_year, ".gdb")
+            )
+            
+            # Rename messy VRI gdb with standard naming scheme
+            file.rename(messy_gdb_name, clean_gdb_name)
+            
+            # Sanity check
+            if (!fs::dir_exists(clean_gdb_name)) { stop("Bad VRI gdb names.") }
+            if (fs::dir_exists(messy_gdb_name)) { stop("Bad VRI gdb names.") }
           }
           
           # Query cached VRI gdb for polygons in sample area

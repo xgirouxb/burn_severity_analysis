@@ -68,7 +68,7 @@ list(
     name = vri_r1_polygons,
     command = get_vri_polygons(
       sf_aoi = study_fire_sampling_polygons,
-      vri_lyr_name = "VEG_COMP_LYR_R1_POLY"
+      vri_lyr_name = "LYR_R1"
     )
   ),
   # Import VRI D layer (dead) polygons for study years and fires
@@ -76,7 +76,7 @@ list(
     name = vri_d_polygons,
     command = get_vri_polygons(
       sf_aoi = study_fire_sampling_polygons,
-      vri_lyr_name = "VEG_COMP_LYR_D_POLY"
+      vri_lyr_name = "LYR_D"
     )
   ),
   # Import burn sample points from raw BC fire dataset (MGH)
