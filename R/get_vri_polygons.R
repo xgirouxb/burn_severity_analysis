@@ -72,6 +72,13 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
     dplyr::pull(sf_poly) %>% 
     # Bind_rows
     dplyr::bind_rows() %>% 
+    # Cast dttm columns to UTC
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::where(~ inherits(.x, "POSIXt")),
+        ~ lubridate::with_tz(.x, tzone = "UTC")
+      )
+    ) %>% 
     # Clean up ESRI slop
     dplyr::select(
       -dplyr::starts_with("Shape"), 
