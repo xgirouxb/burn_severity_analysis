@@ -62,20 +62,33 @@ get_land_cover_class_tbl <- function(
   # Authenticate with service account JSON key
   googledrive::drive_auth(path = GOOGLE_API_KEY)
   
-  # Download the file to local _cache
+  # List all files in the folder that match the name pattern
+  matched_files <- googledrive::drive_ls(path = "ee_bc_burn_severity/") %>%
+    dplyr::filter(name == "landcover_proportion_samples.csv") %>%
+    # Parse `drive_resource` list to extract file timestamp
+    dplyr::mutate(created_time = purrr::map_chr(drive_resource, ~ .x$createdTime)) %>%
+    # Sort by most recent to oldest file
+    dplyr::arrange(dplyr::desc(created_time))
+  
+  # Sanity check: Was a file was found?
+  if (nrow(matched_files) == 0) {
+    stop("No file named 'landcover_proportion_samples.csv' found in the folder.")
+  }
+  
+  # Download the most recent matching file
   googledrive::drive_download(
-    file = "ee_bc_burn_severity/landcover_proportion_samples.csv",
+    file = dplyr::slice(matched_files, 1),
     path = "data/_cache/landcover/landcover_proportion_samples.csv",
     overwrite = TRUE
   )
   
   # Create column selectors to organize columns by neighbourhood size
   radius_selectors <- purrr::map(
-    radii_list,
+    neighbourhood_radius,
     ~ rlang::expr(dplyr::ends_with(!!paste0(.x, "m")))
   )
   
-  # Read in landcover samples
+  # Read in land cover samples
   land_cover_classes <- readr::read_csv(
     file = "data/_cache/landcover/landcover_proportion_samples.csv"
   ) %>% 
