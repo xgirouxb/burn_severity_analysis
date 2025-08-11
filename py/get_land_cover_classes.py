@@ -141,7 +141,7 @@ def sample_lc_classes(sample_pts, radius_list=ee.List([1000])):
         description='landcover_proportion_samples',
         folder='ee_bc_burn_severity',
         fileFormat='CSV',
-        selectors = property_names
+        selectors=property_names
     )
     task.start()
 
