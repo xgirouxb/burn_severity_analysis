@@ -5,7 +5,11 @@
 .Ruserdata
 .Rprofile
 
-# Project data inputs (cache and scrath) and ouputs
+# Python cache files
+__pycache__/
+*.pyc
+
+# Project data inputs (cache and scratch) and ouputs
 data/**
 !data/*
 outputs/
@@ -15,7 +19,7 @@ notebooks/*.html
 notebooks/*.md
 notebooks/_recycle_bin/
 
-# renv project files
+# {renv} project files
 renv/library/
 renv/local/
 renv/cellar/
@@ -24,5 +28,8 @@ renv/python/
 renv/sandbox/
 renv/staging/
 
-# targets project files
+# {targets} project files
 _targets/
+
+# Credentials
+secrets/
