@@ -35,3 +35,9 @@ path_vri_species_key <- "data/vri_species_key.csv"
 # Metadata available at: https://catalogue.data.gov.bc.ca/dataset/harvested-areas-of-bc-consolidated-cutblocks-
 # Dataset UUID can be found using bcdata::bcdc_search("consolidated cutblocks")
 uuid_bc_cutblocks <- "b1b647a6-f271-42e0-9cd0-89ec24bce9f7"
+
+# ---------------------------------------------------------------------------- #
+# Canada high-resolution annual forest land cover
+# Metadata available at: https://gee-community-catalog.org/projects/ca_lc/
+# Publication for methodology: https://doi.org/10.1016/j.rse.2021.112780
+gee_assetid_land_cover <- "projects/ee-bc-burn-severity/assets/burn_sample_points"

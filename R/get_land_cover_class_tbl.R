@@ -19,9 +19,7 @@ get_land_cover_class_tbl <- function(
   ee_task <- reticulate::import_from_path("monitor_ee_task", "py")
 
   # Feature collection of burn sample points
-  ee_burn_sample_points <- ee$FeatureCollection(
-    'projects/ee-bc-burn-severity/assets/burn_sample_points'
-  )
+  ee_burn_sample_points <- ee$FeatureCollection(gee_assetid_land_cover)
 
   # Sanity check: `burn_sample_points` in GEE assets should have same number of
   #                sample points as local `burn_sample_points` target.
