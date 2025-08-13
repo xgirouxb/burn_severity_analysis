@@ -60,6 +60,11 @@ list(
     name = cutblock_polygons,
     command = get_cutblock_polygons(study_fire_sampling_polygons)
   ),
+  # Import historical fires that intersect/predate study fire sampling polygons
+  tar_target(
+    name = historical_fire_polygons,
+    command = get_historical_fire_polygons(study_fire_sampling_polygons)
+  ),
   # Track VRI leading species key for any updates on disk
   tar_target(
     name = tracked_vri_species_key,

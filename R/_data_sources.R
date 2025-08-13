@@ -11,6 +11,12 @@ url_statcan_admin_bounds <- "https://www12.statcan.gc.ca/census-recensement/2021
 url_nbac_archive <- "https://cwfis.cfs.nrcan.gc.ca/downloads/nbac/"
 
 # ---------------------------------------------------------------------------- #
+# British Columbia - Historical Wildfire Fire Perimeters 
+# Metadata available at: https://catalogue.data.gov.bc.ca/dataset/bc-wildfire-fire-perimeters-historical
+# Dataset UUID can be found using bcdata::bcdc_search("bc-wildfire-fire-perimeters-historical")
+uuid_bc_historical_fires <- "22c7cb44-1463-48f7-8e47-88857f207702"
+
+# ---------------------------------------------------------------------------- #
 # Matt Heathcoat's raw BC burn severity dataset 
 path_fire_data <- "data/raw_burn_data/BCfiresDF.csv"
 
