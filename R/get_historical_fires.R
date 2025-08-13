@@ -50,7 +50,9 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
   # Step 2: Import and wrangle BC historical fire archive                   ####
   
   # Import BC historical fire archive polygons                                    
-  hist_bc_fire_polygons <- bcdata::bcdc_query_geodata(uuid_bc_historical_fires) %>% 
+  hist_bc_fire_polygons <- bcdata::bcdc_query_geodata(
+    uuid_bc_historical_fires
+  ) %>% 
     # Limit query to years prior to NBAC archive 
     dplyr::filter(FIRE_YEAR < 1973) %>%
     # Fetch from BC data archives
@@ -79,7 +81,7 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
     sf::st_cast("MULTIPOLYGON")
 
   # -------------------------------------------------------------------------- #
-  # Step 3: Combine NBAC and BC historical fire archives                   ####
+  # Step 3: Combine NBAC and BC historical fire archives                    ####
   
   # Combine historical fire datasets
   historical_fire_polygons <- dplyr::bind_rows(
