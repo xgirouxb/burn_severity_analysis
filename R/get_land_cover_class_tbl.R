@@ -28,7 +28,7 @@ get_land_cover_class_tbl <- function(
   if (ee_burn_sample_points$size()$getInfo() != nrow(burn_sample_points)) {
     # ...if it does not stop and print error
     stop(
-      "`burn_sample points` in GEE assets does not match local copy, upload latest version!",
+      "`burn_sample_points` in GEE assets does not match local copy, upload latest version!",
     )
   }
   
