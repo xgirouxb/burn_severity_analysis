@@ -1,4 +1,6 @@
-get_bc_burn_sample_points <- function(path_fire_data){
+get_bc_burn_sample_points <- function(
+    path_fire_data, study_fire_sampling_polygons
+){
   
   # Read in the raw data
   raw_data <- readr::read_csv(path_fire_data, show_col_types = FALSE) %>% 
@@ -16,8 +18,12 @@ get_bc_burn_sample_points <- function(path_fire_data){
     ) %>% 
     # Select columns of interest for downstream sampling
     dplyr::select(id = oid, fire_id, old_fire_id, fire_year, x_3005, y_3005) %>%
-    # Testing
-    {.}
+    # Purge duplicated sample ids (due to error in DOB2 values)
+    dplyr::add_count(id) %>%
+    dplyr::filter(n == 1) %>%
+    dplyr::select(-n) %>% 
+    # Remove samples without fire_ids included in study fire sampling polygons
+    dplyr::filter(fire_id %in% unique(study_fire_sampling_polygons$fire_id))
   
   # Convert to simple feature
   burn_sample_points <- raw_data %>% 
