@@ -55,7 +55,7 @@ prep_vri_polygons <- function(
   # -------------------------------------------------------------------------- #
   # Step 1: Retain leading species                                          ####
   #         - Get the dominant leading species listed in VRI treed stand
-  #         - Pool rarer species to save factor degrees of freedom
+  #         - Pool rarer species to save factor variable degrees of freedom
   #           (and help imputation)
   
   # Save leading species 
@@ -176,7 +176,13 @@ prep_vri_polygons <- function(
     ) %>% 
     # Compute some new attributes
     dplyr::mutate(
-      # Harvest date
+      # VRI archive year
+      projected_year = lubridate::year(projected_date),
+      # VRI year source data was collected, interpreted, and input in dbase  
+      reference_year, # Collected
+      interpretation_year = lubridate::year(interpretation_date), # Interpreted
+      input_year = lubridate::year(input_date), # Input
+      # Harvest year
       harvest_year = lubridate::year(harvest_date),
       # Stand total biomass (whole_stem, branch, foliage, bark)
       total_biomass_per_ha = rowSums(
@@ -209,6 +215,11 @@ prep_vri_polygons <- function(
     dplyr::select(
       # Fire and VRI polygon IDs
       fire_year, fire_id, feature_id,
+      # VRI archive dates
+      projected_year, # Archive year
+      reference_year, # Attribute data collected
+      interpretation_year, # Attribute data interpreted
+      input_year, # Attribute data input in archive
       # Disturbance date
       harvest_year,
       # Stand composition
@@ -283,7 +294,9 @@ prep_vri_polygons <- function(
     x = vri_r1,
     y = vri_d,
     by = c("fire_year", "fire_id", "feature_id")
-  )
+  ) %>% 
+    # Add vri_ prefix to VRI feature id
+    dplyr::rename(vri_feature_id = feature_id)
   
   # Return
   return(vri_out)
