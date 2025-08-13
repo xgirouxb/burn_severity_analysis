@@ -33,3 +33,6 @@ _targets/
 
 # Credentials
 secrets/
+
+# Recycle bin
+recycle_bin/
