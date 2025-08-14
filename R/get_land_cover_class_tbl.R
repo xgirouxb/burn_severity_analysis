@@ -88,7 +88,8 @@ get_land_cover_class_tbl <- function(
   
   # Read in land cover samples
   land_cover_classes <- readr::read_csv(
-    file = "data/_cache/landcover/landcover_proportion_samples.csv"
+    file = "data/_cache/landcover/landcover_proportion_samples.csv",
+    show_col_types = FALSE
   ) %>% 
     # Reorder columns
     dplyr::select(id, fire_id, fire_year, landcover, !!!radius_selectors)
