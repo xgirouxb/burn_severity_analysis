@@ -108,11 +108,11 @@ def sample_lc_classes(sample_pts, radius_list=ee.List([1000])):
             t_area = ee.Number(lc_area.get('constant'))
 
             return ee.List([
-                [make_key('prop_nonfuel_', radius), ee.Number(lc_area.get('nonfuel')).divide(t_area)],
-                [make_key('prop_open_', radius), ee.Number(lc_area.get('open')).divide(t_area)],
-                [make_key('prop_wetland_', radius), ee.Number(lc_area.get('wetland')).divide(t_area)],
-                [make_key('prop_coniferous_', radius), ee.Number(lc_area.get('coniferous')).divide(t_area)],
-                [make_key('prop_deciduous_', radius), ee.Number(lc_area.get('deciduous')).divide(t_area)],
+                [make_key('lc_prop_nonfuel_', radius), ee.Number(lc_area.get('nonfuel')).divide(t_area)],
+                [make_key('lc_prop_open_', radius), ee.Number(lc_area.get('open')).divide(t_area)],
+                [make_key('lc_prop_wetland_', radius), ee.Number(lc_area.get('wetland')).divide(t_area)],
+                [make_key('lc_prop_coniferous_', radius), ee.Number(lc_area.get('coniferous')).divide(t_area)],
+                [make_key('lc_prop_deciduous_', radius), ee.Number(lc_area.get('deciduous')).divide(t_area)],
             ])
             
         # Map over list of radii, outputs list of lists of key-value pairs
@@ -122,7 +122,7 @@ def sample_lc_classes(sample_pts, radius_list=ee.List([1000])):
         key_value_list = key_value_lists.flatten().flatten()
         
         # Convert to dictionary, add landcover class property
-        key_value_dict = ee.Dictionary(key_value_list).set('landcover', lc_pt_str)
+        key_value_dict = ee.Dictionary(key_value_list).set('lc_land_cover', lc_pt_str)
         
         return sample_pt.set(key_value_dict)
     
@@ -138,7 +138,7 @@ def sample_lc_classes(sample_pts, radius_list=ee.List([1000])):
     # Export to Google Drive
     task = ee.batch.Export.table.toDrive(
         collection=sampled_lc,
-        description='landcover_proportion_samples',
+        description='land_cover_proportion_samples',
         folder='ee_bc_burn_severity',
         fileFormat='CSV',
         selectors=property_names

@@ -62,7 +62,7 @@ get_land_cover_class_tbl <- function(
   
   # List all files in the folder that match the name pattern
   matched_files <- googledrive::drive_ls(path = "ee_bc_burn_severity/") %>%
-    dplyr::filter(name == "landcover_proportion_samples.csv") %>%
+    dplyr::filter(name == "land_cover_proportion_samples.csv") %>%
     # Parse `drive_resource` list to extract file timestamp
     dplyr::mutate(created_time = purrr::map_chr(drive_resource, ~ .x$createdTime)) %>%
     # Sort by most recent to oldest file
@@ -70,14 +70,14 @@ get_land_cover_class_tbl <- function(
   
   # Sanity check: Was a file was found?
   if (nrow(matched_files) == 0) {
-    stop("No file named 'landcover_proportion_samples.csv' found in the folder.")
+    stop("No file named 'land_cover_proportion_samples.csv' found in the folder.")
   }
   
   # Download the most recent matching file
   googledrive::drive_download(
     file = dplyr::slice(matched_files, 1),
-    path = "data/_cache/landcover/landcover_proportion_samples.csv",
-    overwrite = TRUE
+    path = "data/_cache/land_cover/land_cover_proportion_samples.csv",
+    overwrite = TRUE,
   )
   
   # Create column selectors to organize columns by neighbourhood size
@@ -88,11 +88,11 @@ get_land_cover_class_tbl <- function(
   
   # Read in land cover samples
   land_cover_classes <- readr::read_csv(
-    file = "data/_cache/landcover/landcover_proportion_samples.csv",
+    file = "data/_cache/land_cover/land_cover_proportion_samples.csv",
     show_col_types = FALSE
   ) %>% 
     # Reorder columns
-    dplyr::select(id, fire_id, fire_year, landcover, !!!radius_selectors)
+    dplyr::select(id, fire_id, fire_year, lc_land_cover, !!!radius_selectors)
   
   # Return
   return(land_cover_classes)
