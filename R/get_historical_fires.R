@@ -4,14 +4,14 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
   # Step 1: Import and wrangle NBAC archive                                 ####
   
   # Get NBAC archive URLs for all years between 1973 (start of archive)
-  # and the year preceding the most recent study year
+  # and the year after the last study year
   list_nbac_subdir <- purrr::map(
-    .x = 1973:(max(study_fire_sampling_polygons$fire_year)-1),
+    .x = 1973:(max(study_years) + 1),
     .f = ~{ 
       get_url_list(url = url_nbac_archive, match_string = paste0("NBAC_", .x)) 
     }
   )
-  
+
   # Import NBAC fire polygons for British Columbia
   hist_nbac_fire_polygons <- purrr::map(
     .x = list_nbac_subdir,
@@ -27,21 +27,13 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
       hist_fire_id = paste0(YEAR, "_", NFIREID),
       hist_fire_year = YEAR,
     ) %>% 
-    # Spatial inner join (many to many) fires that intersect study fire polygons
+    # Spatial inner join to filter historical fires that intersect study fires
     sf::st_join(y = study_fire_sampling_polygons, left = FALSE) %>% 
-    # Filter for historical fires that predate study fires
-    dplyr::filter(hist_fire_year < fire_year) %>% 
+    # Retain unique historical fires (some fires may intersect > 1 study fire)
+    dplyr::distinct(hist_fire_id, .keep_all = TRUE) %>% 
     # Dissolve into single MULTIPOLYGON for each historical fire
-    dplyr::group_by(
-      # Study fire attributes
-      fire_id, fire_year,
-      # Historical fire attributes
-      hist_fire_src, hist_fire_id, hist_fire_year
-    ) %>%
-    dplyr::summarize(
-      geometry = sf::st_union(geometry),
-      .groups = "drop"
-    ) %>%
+    dplyr::group_by(hist_fire_src, hist_fire_id, hist_fire_year) %>%
+    dplyr::summarize(geometry = sf::st_union(geometry), .groups = "drop") %>%
     # Fix topology errors
     sf::st_make_valid() %>%
     sf::st_cast("MULTIPOLYGON")
@@ -63,19 +55,13 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
       hist_fire_id = stringr::str_extract(id, "\\d+$"),
       hist_fire_year = FIRE_YEAR,
     ) %>%
-    # Spatial inner join (many to many) fires that intersect study fire polygons
+    # Spatial inner join to filter historical fires that intersect study fires
     sf::st_join(y = study_fire_sampling_polygons, left = FALSE) %>% 
+    # Retain unique historical fires (some fires may intersect > 1 study fire)
+    dplyr::distinct(hist_fire_id, .keep_all = TRUE) %>%  
     # Dissolve into single MULTIPOLYGON for each historical fire
-    dplyr::group_by(
-      # Study fire attributes
-      fire_id, fire_year,
-      # Historical fire attributes
-      hist_fire_src, hist_fire_id, hist_fire_year
-    ) %>%
-    dplyr::summarize(
-      geometry = sf::st_union(geometry),
-      .groups = "drop"
-    ) %>%
+    dplyr::group_by(hist_fire_src, hist_fire_id, hist_fire_year) %>%
+    dplyr::summarize(geometry = sf::st_union(geometry), .groups = "drop") %>%
     # Fix topology errors
     sf::st_make_valid() %>%
     sf::st_cast("MULTIPOLYGON")
