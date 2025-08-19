@@ -40,4 +40,9 @@ uuid_bc_cutblocks <- "b1b647a6-f271-42e0-9cd0-89ec24bce9f7"
 # Canada high-resolution annual forest land cover
 # Metadata available at: https://gee-community-catalog.org/projects/ca_lc/
 # Publication for methodology: https://doi.org/10.1016/j.rse.2021.112780
-gee_assetid_land_cover <- "projects/ee-bc-burn-severity/assets/burn_sample_points"
+gee_assetid_land_cover <- "projects/sat-io/open-datasets/CA_FOREST_LC_VLCE2"
+
+# ---------------------------------------------------------------------------- #
+# Burn sample points
+# Copy of local `burn_sample_points` target sf object uploaded to GEE assets 
+gee_assetid_sample_points <- "projects/ee-bc-burn-severity/assets/burn_sample_points"

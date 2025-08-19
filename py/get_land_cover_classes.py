@@ -26,12 +26,19 @@ def lc_binary_bands(img):
     ])
 
 # Main sampling function
-def sample_lc_classes(sample_pts, radius_list=ee.List([1000])):
+def sample_lc_classes(
+  sample_pts,
+  forest_land_cover = ee.ImageCollection("projects/sat-io/open-datasets/CA_FOREST_LC_VLCE2"),
+  radius_list=ee.List([1000])
+):
     """
-    Samples landcover around a fire point and exports results to Drive.
+    Samples forest land cover type and porportions around a fire sampling points,
+    exports results to Drive.
     
     Parameters:
         sample_pts (ee.FeatureCollection): Points with 'fire_year' property.
+        forest_land_cover (ee.ImageCollection): Annual landcover images from
+                                                doi.org/10.1016/j.rse.2021.112780
         radius_list (ee.List): List containing radius or radii in meters for
                                buffer(s) used to compute proportions around
                                each sample point.
@@ -59,7 +66,7 @@ def sample_lc_classes(sample_pts, radius_list=ee.List([1000])):
 
     # Prepare land cover image collection
     forest_lc = (
-      ee.ImageCollection("projects/sat-io/open-datasets/CA_FOREST_LC_VLCE2")
+      forest_land_cover
         .map(add_year_prop)
         .map(remap_lc_classes)
         .map(lc_binary_bands)

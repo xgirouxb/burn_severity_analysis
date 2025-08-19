@@ -19,7 +19,10 @@ get_land_cover_class_tbl <- function(
   ee_task <- reticulate::import_from_path("monitor_ee_task", "py")
 
   # Feature collection of burn sample points
-  ee_burn_sample_points <- ee$FeatureCollection(gee_assetid_land_cover)
+  ee_burn_sample_points <- ee$FeatureCollection(gee_assetid_sample_points)
+  
+  # Image collection of forest land cover (doi.org/10.1016/j.rse.2021.112780)
+  ee_forest_land_cover <- ee$ImageCollection(gee_assetid_land_cover)
 
   # Sanity check: `burn_sample_points` in GEE assets should have same number of
   #                sample points as local `burn_sample_points` target.
@@ -39,6 +42,7 @@ get_land_cover_class_tbl <- function(
   # Launch task on EE
   sample_task <- get_lc$sample_lc_classes(
     sample_pts = ee_burn_sample_points,
+    forest_land_cover = ee_forest_land_cover,
     radius_list = ee_radius_list
   )
   
