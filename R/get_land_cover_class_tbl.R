@@ -68,7 +68,7 @@ get_land_cover_class_tbl <- function(
     # Sort by most recent to oldest file
     dplyr::arrange(dplyr::desc(created_time))
   
-  # Sanity check: Was a file was found?
+  # Sanity check: Was a matching file found?
   if (nrow(matched_files) == 0) {
     stop("No file named 'land_cover_proportion_samples.csv' found in the folder.")
   }
