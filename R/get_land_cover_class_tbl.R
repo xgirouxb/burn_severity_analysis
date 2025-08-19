@@ -82,8 +82,16 @@ get_land_cover_class_tbl <- function(
   
   # Create column selectors to organize columns by neighbourhood size
   radius_selectors <- purrr::map(
-    neighbourhood_radius,
-    ~ rlang::expr(dplyr::ends_with(!!paste0(.x, "m")))
+    # Build strings for all lc variables
+    tidyr::crossing(
+      type = c("coniferous", "deciduous", "wetland", "nonfuel"),
+      radius = neighbourhood_radius
+    ) %>% 
+      dplyr::arrange(radius) %>% 
+      dplyr::mutate(lc_var_name = paste0(type, "_", radius, "m")) %>% 
+      dplyr::pull(lc_var_name),
+    # Transform them into a <tidy-select> expression
+    ~ rlang::expr(dplyr::ends_with(!!.x))
   )
   
   # Read in land cover samples
