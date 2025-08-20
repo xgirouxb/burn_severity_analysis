@@ -23,16 +23,16 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
     dplyr::filter(ADMIN_AREA == "BC") %>% 
     # Add some unique historical fire attributes 
     dplyr::mutate(
-      hist_fire_src = "nbac",
-      hist_fire_id = paste0(YEAR, "_", NFIREID),
-      hist_fire_year = YEAR,
+      hf_fire_src = "nbac",
+      hf_fire_id = paste0(YEAR, "_", NFIREID),
+      hf_fire_year = YEAR,
     ) %>% 
     # Spatial inner join to filter historical fires that intersect study fires
     sf::st_join(y = study_fire_sampling_polygons, left = FALSE) %>% 
     # Retain unique historical fires (some fires may intersect > 1 study fire)
-    dplyr::distinct(hist_fire_id, .keep_all = TRUE) %>% 
+    dplyr::distinct(hf_fire_id, .keep_all = TRUE) %>% 
     # Dissolve into single MULTIPOLYGON for each historical fire
-    dplyr::group_by(hist_fire_src, hist_fire_id, hist_fire_year) %>%
+    dplyr::group_by(hf_fire_src, hf_fire_id, hf_fire_year) %>%
     dplyr::summarize(geometry = sf::st_union(geometry), .groups = "drop") %>%
     # Fix topology errors
     sf::st_make_valid() %>%
@@ -51,16 +51,16 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
     bcdata::collect() %>%
     # Add some unique historical fire attributes 
     dplyr::mutate(
-      hist_fire_src = "bc",
-      hist_fire_id = stringr::str_extract(id, "\\d+$"),
-      hist_fire_year = FIRE_YEAR,
+      hf_fire_src = "bc",
+      hf_fire_id = stringr::str_extract(id, "\\d+$"),
+      hf_fire_year = FIRE_YEAR,
     ) %>%
     # Spatial inner join to filter historical fires that intersect study fires
     sf::st_join(y = study_fire_sampling_polygons, left = FALSE) %>% 
     # Retain unique historical fires (some fires may intersect > 1 study fire)
-    dplyr::distinct(hist_fire_id, .keep_all = TRUE) %>%  
+    dplyr::distinct(hf_fire_id, .keep_all = TRUE) %>%  
     # Dissolve into single MULTIPOLYGON for each historical fire
-    dplyr::group_by(hist_fire_src, hist_fire_id, hist_fire_year) %>%
+    dplyr::group_by(hf_fire_src, hf_fire_id, hf_fire_year) %>%
     dplyr::summarize(geometry = sf::st_union(geometry), .groups = "drop") %>%
     # Fix topology errors
     sf::st_make_valid() %>%
