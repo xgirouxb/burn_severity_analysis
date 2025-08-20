@@ -98,7 +98,7 @@ list(
     name = land_cover_class_tbl,
     command = get_land_cover_class_tbl(
       burn_sample_points,
-      # Supply vector of radius within which to evaluate land cover proportions
+      # Supply vector of radii within which to evaluate land cover proportions
       neighbourhood_radius = c(100, 500, 1000)
     )
   ),
