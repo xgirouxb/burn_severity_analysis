@@ -114,6 +114,15 @@ list(
       vri_d_polygons,
       vri_species_key
     )
+  ),
+  # Find samples with disturbances that interfere with burn ratios
+  # (i.e., harvest/fire in 1 year window around study fire)
+  tar_target(
+    name = biased_burn_ratio_sample_ids,
+    command = find_biased_burn_ratio_sample_ids(
+      burn_sample_points,
+      cutblock_polygons,
+      historical_fire_polygons
+    )
   )
-  
 )
