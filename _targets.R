@@ -124,5 +124,17 @@ list(
       cutblock_polygons,
       historical_fire_polygons
     )
+  ),
+  # Sample forest variables: vegetation, land cover, and harvest/fire
+  tar_target(
+    name = forest_variables,
+    command = sample_forest_variables(
+      burn_sample_points,
+      biased_burn_ratio_sample_ids,
+      vri_polygons,
+      land_cover_class_tbl,
+      cutblock_polygons,
+      historical_fire_polygons
+    )
   )
 )
