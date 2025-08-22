@@ -2,7 +2,7 @@ get_bc_burn_sample_points <- function(
     path_fire_data, study_fire_sampling_polygons
 ){
   
-  # Read in the raw data
+  # Read in the raw MGH fire data
   raw_data <- readr::read_csv(path_fire_data, show_col_types = FALSE) %>% 
     # Clean up 
     janitor::clean_names() %>% 
@@ -28,7 +28,7 @@ get_bc_burn_sample_points <- function(
   # Convert to simple feature
   burn_sample_points <- raw_data %>% 
     sf::st_as_sf(coords = c("x_3005", "y_3005"), crs = "EPSG:3005") %>% 
-    # Remove sampling points that do not fall within sample polygons
+    # Remove sampling points that do not fall within fire sampling polygons
     sf::st_filter(study_fire_sampling_polygons)
   
   # Return
