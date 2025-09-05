@@ -102,6 +102,14 @@ list(
       neighbourhood_radius = c(100, 500, 1000)
     )
   ),
+  # Import RESULTS data related to post-disturbance plantations and treatments
+  tar_target(
+    name = bc_results_tbl,
+    command = get_bc_results_tbl(
+      path_fire_data,
+      burn_sample_points
+    )
+  ),
   
   # -------------------------------------------------------------------------- #
   # Prepare input data sets for modelling
