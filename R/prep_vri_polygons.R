@@ -241,6 +241,9 @@ prep_vri_polygons <- function(
       shrub_crown_closure, # Percent ground covered by shrubs (%)
       bryoid_cover_pct, # Percent ground covered by bryoids (%)
       herb_cover_pct, # Percent ground covered by graminoids (%)
+      # British Columbia land cover classification scheme
+      bclcs_level_2,
+      bclcs_level_4,
       # Stand dead attributes
       stand_percentage_dead, # Percent of stand dead following epidemic
       dead_stand_volume_125, # Stand snag volume
