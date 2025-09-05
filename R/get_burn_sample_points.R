@@ -1,5 +1,6 @@
 get_bc_burn_sample_points <- function(
-    path_fire_data, study_fire_sampling_polygons
+    path_fire_data,
+    study_fire_sampling_polygons
 ){
   
   # Read in the raw MGH fire data
@@ -33,5 +34,4 @@ get_bc_burn_sample_points <- function(
   
   # Return
   return(burn_sample_points)
-
 }
