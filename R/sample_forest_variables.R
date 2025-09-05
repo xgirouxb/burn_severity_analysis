@@ -4,13 +4,53 @@ sample_forest_variables <- function(
     vri_polygons,
     land_cover_class_tbl,
     cutblock_polygons,
-    historical_fire_polygons
+    historical_fire_polygons,
+    bc_results_tbl
 ) {
   
   # -------------------------------------------------------------------------- #
-  # Step 1: Sample forest disturbances: harvest + historical fires          ####
+  # Step 1: Sample forest vegetation: VRI archive + land cover images       ####
   
-  # Sample cutblock polygon attributes
+  # Sample vegetation attributes (VRI and Land cover)
+  sampled_vegetation <- burn_sample_points %>%
+    # Nest samples by fire id and year
+    # (as some VRI polygons might intersect points with mismatched years)
+    dplyr::group_split(fire_id, fire_year) %>%
+    # Spatially join VRI attributes to sample points within each study fire
+    purrr::map(
+      ~ sf::st_join(
+        x = .x,
+        # Only sample VRI polygons with matching fire ids
+        y = vri_polygons %>%
+          dplyr::filter(fire_id == unique(.x$fire_id)) %>%
+          dplyr::select(-fire_id, -fire_year),
+        # Inner join in case some samples don't have 
+        left = FALSE
+      )
+    ) %>%
+    # Convert list to sf
+    dplyr::bind_rows() %>%
+    # If >1 VRI polygon intersects point, retain the most recent one
+    dplyr::group_by(id) %>% 
+    dplyr::slice_max(
+      order_by = vri_reference_year,
+      n = 1,
+      # Pick only one if there are ties
+      with_ties = FALSE
+    ) %>% 
+    dplyr::ungroup() %>% 
+    # Join land cover classes and composition
+    dplyr::left_join(
+      land_cover_class_tbl,
+      by = c("id", "fire_id", "fire_year")
+    ) %>% 
+    # Clean up
+    dplyr::select(-vri_feature_id)
+  
+  # -------------------------------------------------------------------------- #
+  # Step 2: Sample forest disturbances                                      ####
+  
+  ## 2.1 Sample cutblock polygon attributes ####
   sampled_cutblocks <- burn_sample_points %>%
     # Spatial inner join cutblocks that intersect sample points
     sf::st_join(
@@ -39,7 +79,7 @@ sample_forest_variables <- function(
       cc_years_since_harvest, cc_percent_clearcut
     )
   
-  # Sample historical fire polygon attributes
+  ## 2.2 Sample historical fire polygon attributes ####
   sampled_historical_fires <- burn_sample_points %>%
     # Spatial inner join fires that intersect sample points
     sf::st_join(y = historical_fire_polygons, left = FALSE) %>%
@@ -58,64 +98,27 @@ sample_forest_variables <- function(
     dplyr::select(id, hf_fire_year, hf_years_since_burn)
   
   # -------------------------------------------------------------------------- #
-  # Step 2: Sample forest vegetation: VRI archive + land cover images       ####
-  
-  # Sample vegetation attributes (VRI and Land cover)
-  sampled_vegetation <- burn_sample_points %>%
-    # Nest samples by fire id and year
-    # (as some VRI polygons might intersect points with mismatched years)
-    dplyr::group_split(fire_id, fire_year) %>%
-    # Spatially join VRI attributes to sample points within each study fire
-    purrr::map(
-      ~ sf::st_join(
-          x = .x,
-          # Only sample VRI polygons with matching fire ids
-          y = vri_polygons %>%
-            dplyr::filter(fire_id == unique(.x$fire_id)) %>%
-            dplyr::select(-fire_id, -fire_year),
-          # Inner join in case some samples don't have 
-          left = FALSE
-        )
-    ) %>%
-    # Convert list to sf
-    dplyr::bind_rows() %>%
-    # If >1 VRI polygon intersects point, retain the most recent one
-    dplyr::group_by(id) %>% 
-    dplyr::slice_max(
-      order_by = vri_reference_year,
-      n = 1,
-      # Pick only one if there are ties
-      with_ties = FALSE
-    ) %>% 
-    dplyr::ungroup() %>% 
-    # Join land cover classes and composition
-    dplyr::left_join(
-      land_cover_class_tbl,
-      by = c("id", "fire_id", "fire_year")
-    ) %>% 
-    # Clean up
-    dplyr::select(-vri_feature_id)
-  
-  # -------------------------------------------------------------------------- #
-  # Step 3: Join and return forest vegetation and disturbances variables    ####
+  # Step 3: Join forest vegetation/disturbances                             ####
   
   # Join sampled vegetation and disturbance data
-  forest_variables <- sampled_vegetation %>% 
+  joined_forest_variables <- sampled_vegetation %>% 
     # Left-join consolidated cutblock attributes
-    dplyr::left_join(
-      sampled_cutblocks,
-      by = "id"
-    ) %>% 
+    dplyr::left_join(sampled_cutblocks, by = "id") %>% 
     # Left-join historical fire attributes
-    dplyr::left_join(
-      sampled_historical_fires,
-      by = "id"
-    ) %>% 
-    # Remove samples with possibly biased burn ratios
-    dplyr::filter(!(id %in% biased_burn_ratio_sample_ids)) %>%
-    # Put geometry column last
-    dplyr::relocate(geometry, .after = dplyr::last_col())
-
+    dplyr::left_join(sampled_historical_fires, by = "id") %>% 
+    # Left-join BC RESULTS disturbance attributes
+    dplyr::left_join(bc_results_tbl, by = "id")
+  
+  # -------------------------------------------------------------------------- #
+  # Step 4: Remove samples with potentially biased burn ratios, return      ####
+  
+  # Samples with disturbances 1 year prior, 1 year after or same year as fire
+  # will have biased burn ratios because it may accentuate image differencing
+  forest_variables <- joined_forest_variables %>% 
+    # Remove observations where cutblocks/burns occurred in 1-year window around 
+    # study fire (e.g. salvage logging)
+    dplyr::filter(!(id %in% biased_burn_ratio_sample_ids))
+    
   # Return
   return(forest_variables)
 }
