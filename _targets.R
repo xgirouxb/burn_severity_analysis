@@ -142,7 +142,8 @@ list(
       vri_polygons,
       land_cover_class_tbl,
       cutblock_polygons,
-      historical_fire_polygons
+      historical_fire_polygons,
+      bc_results_tbl
     )
   )
 )
