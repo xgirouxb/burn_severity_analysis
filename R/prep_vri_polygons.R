@@ -227,7 +227,6 @@ prep_vri_polygons <- function(
       projected_year, # Archive year
       reference_year, # Attribute data collected
       interpretation_year, # Attribute data interpreted
-      input_year, # Attribute data input in archive
       # Disturbance date
       harvest_year,
       # Stand composition
