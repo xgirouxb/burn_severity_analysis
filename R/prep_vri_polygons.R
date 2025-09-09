@@ -185,9 +185,13 @@ prep_vri_polygons <- function(
       # Harvest year
       harvest_year = lubridate::year(harvest_date),
       # Stand total biomass (whole_stem, branch, foliage, bark)
-      total_biomass_per_ha = rowSums(
-        dplyr::across(dplyr::contains("_biomass_per_ha")),
-        na.rm = TRUE
+      total_biomass_per_ha = dplyr::if_else(
+        # If all VRI biomass variables are NA
+        dplyr::if_all(dplyr::contains("_biomass_per_ha"), ~ is.na(.x)),
+        # Return NA
+        NA_real_,
+        # Else return their sum 
+        rowSums(dplyr::across(dplyr::contains("_biomass_per_ha")), na.rm = TRUE)
       ),
       # Weighted mean height/age of two leading species
       mean_proj_age = dplyr::case_when(
@@ -197,8 +201,8 @@ prep_vri_polygons <- function(
         !is.na(proj_age_1) & !is.na(proj_age_2) ~
           proj_age_1*(species_pct_1/(species_pct_1 + species_pct_2)) +
           proj_age_2*(species_pct_2/(species_pct_1 + species_pct_2)),
-        # Else, return 0
-        TRUE ~ 0
+        # Else, return NA
+        TRUE ~ NA_real_
       ),
       mean_proj_height = dplyr::case_when(
         # If second species has no height, only use species 1
@@ -207,9 +211,13 @@ prep_vri_polygons <- function(
         !is.na(proj_height_1) & !is.na(proj_height_2) ~
           proj_height_1*(species_pct_1/(species_pct_1 + species_pct_2)) +
           proj_height_2*(species_pct_2/(species_pct_1 + species_pct_2)),
-        # Else, return 0
-        TRUE ~ 0
-      )
+        # Else, return NA
+        TRUE ~ NA_real_
+      ),
+      # Set BCLCS level 4 to "WA" when water in level 2 (it is currently NA)
+      bclcs_level_4 = dplyr::if_else(bclcs_level_2 == "W", "WA", bclcs_level_4),
+      # Set pther BCLCS level 4 NAs to "UNK"
+      bclcs_level_4 = dplyr::if_else(is.na(bclcs_level_4), "UNK", bclcs_level_4)
     ) %>%
     # Select attributes of interest ------------------------------------------ #
     dplyr::select(
@@ -241,7 +249,7 @@ prep_vri_polygons <- function(
       shrub_crown_closure, # Percent ground covered by shrubs (%)
       bryoid_cover_pct, # Percent ground covered by bryoids (%)
       herb_cover_pct, # Percent ground covered by graminoids (%)
-      # British Columbia land cover classification scheme
+      # British Columbia land cover classification scheme level 2 and 4
       bclcs_level_2,
       bclcs_level_4,
       # Stand dead attributes
