@@ -123,3 +123,36 @@ get_sf_from_source <- function(
   # Return 
   return(sf_obj)
 }
+
+#' Download a tif from a URL to a local directory
+#'
+#' @param tif_url A URL string with the address of the tif file.
+#' @param output_dir An output directory where the tif is downloaded. It can be
+#'                   useful to supply this for large files so they avoid
+#'                   garbage collection in temp folders.
+#'
+#' @return A string with the local directory where the tif file is cached.
+#'
+get_tif_from_url <- function(
+    tif_url,
+    output_dir = NULL
+) {
+  
+  # Check if supplied URL string is valid
+  if (!is_url(tif_url)) { stop("Invalid URL") }
+  
+  # Create output directory, use temp folder if output_dir is not supplied
+  fs::dir_create(output_dir <- output_dir %||% tempfile())
+  
+  # Extract filename from URL
+  file_name <- fs::path_file(tif_url)
+  
+  # Full path to save file
+  dest_path <- fs::path(output_dir, file_name)
+  
+  # Download tif file from URL
+  download.file(tif_url, destfile = dest_path, quiet = TRUE, mode = "wb")
+  
+  # Return path to file in temp directory or supplied output directory 
+  return(dest_path)
+}
