@@ -17,6 +17,16 @@ url_nbac_archive <- "https://cwfis.cfs.nrcan.gc.ca/downloads/nbac/"
 uuid_bc_historical_fires <- "22c7cb44-1463-48f7-8e47-88857f207702"
 
 # ---------------------------------------------------------------------------- #
+# pre-CanLaD (1965-1984) - NRCAN Canada Landsat Disturbances backcast, version 1
+# Metadata available at: 
+url_precanlad_1965_1984 <- "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada_disturbances_1965to1984/v1/"
+ 
+# ---------------------------------------------------------------------------- #
+# CanLaD (1985-2024) - NRCAN Canada Landsat Disturbances, version 1
+# Metadata available at:
+url_canlad_1985_2024 <- "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canlad_including_insect_defoliation/v1/Disturbances_Time_Series/"
+
+# ---------------------------------------------------------------------------- #
 # Matt Heathcoat's raw BC burn severity dataset 
 path_fire_data <- "data/raw_burn_data/BCfiresDF.csv"
 
