@@ -65,6 +65,16 @@ list(
     name = historical_fire_polygons,
     command = get_historical_fire_polygons(study_fire_sampling_polygons)
   ),
+  # Import CanLaD harvest and fire disturbance rasters for study fire areas
+  tar_target(
+    name = canlad_disturbance_rasters,
+    command = get_canlad_disturbance_rasters(study_fire_sampling_polygons)
+  ),
+  # Import pre-CanLaD harvest and fire disturbance rasters for study fire areas
+  tar_target(
+    name = precanlad_disturbance_rasters,
+    command = get_precanlad_disturbance_rasters(study_fire_sampling_polygons)
+  ),
   # Track VRI leading species key for any updates on disk
   tar_target(
     name = tracked_vri_species_key,
