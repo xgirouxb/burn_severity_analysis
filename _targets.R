@@ -153,6 +153,8 @@ list(
       land_cover_class_tbl,
       cutblock_polygons,
       historical_fire_polygons,
+      canlad_disturbance_rasters,
+      precanlad_disturbance_rasters,
       bc_results_tbl
     )
   )
