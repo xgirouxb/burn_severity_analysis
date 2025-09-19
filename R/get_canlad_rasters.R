@@ -164,7 +164,7 @@ get_precanlad_disturbance_rasters <- function(
     dplyr::group_nest(fire_id) %>% 
     # Get year of harvest and wildfire disturbances in pre-CanLaD image
     dplyr::mutate(
-      precanlad = purrr::map2(
+      precanlad_file_path = purrr::map2(
         data,
         fire_id,
         ~{
