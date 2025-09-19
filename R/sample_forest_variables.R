@@ -5,6 +5,8 @@ sample_forest_variables <- function(
     land_cover_class_tbl,
     cutblock_polygons,
     historical_fire_polygons,
+    canlad_disturbance_rasters,
+    precanlad_disturbance_rasters,
     bc_results_tbl
 ) {
   
@@ -97,6 +99,48 @@ sample_forest_variables <- function(
     # Clean-up
     dplyr::select(id, hf_fire_year, hf_years_since_burn)
   
+  ## 2.3 Sample CanLaD harvest (1985-2020) and fire disturbances ####
+  sampled_canlad_disturbances <- burn_sample_points %>%
+    # Nest by study fire
+    dplyr::group_nest(fire_id) %>% 
+    # Join table of CanLaD raster file names
+    dplyr::left_join(canlad_disturbance_rasters, by = "fire_id") %>% 
+    # Sample rasters
+    dplyr::mutate(
+      canlad_samples = purrr::map2(
+        canlad_file_path,
+        data,
+        ~ terra::extract(x = terra::rast(.x), y = terra::vect(.y)) %>% 
+            tibble::as_tibble() %>% 
+            dplyr::select(-ID) %>% 
+            dplyr::bind_cols(tibble::tibble(id = .y$id))
+      )
+    ) %>% 
+    # Clean-up and unnest
+    dplyr::select(canlad_samples) %>% 
+    tidyr::unnest(cols = c(canlad_samples))
+
+    ## 2.4 Sample pre-CanLaD (1964-1984) harvest and fire disturbances ####
+    sampled_precanlad_disturbances <- burn_sample_points %>%
+      # Nest by study fire
+      dplyr::group_nest(fire_id) %>% 
+      # Join table of pre-CanLaD raster file names
+      dplyr::left_join(precanlad_disturbance_rasters, by = "fire_id") %>% 
+      # Sample rasters
+      dplyr::mutate(
+        precanlad_samples = purrr::map2(
+          precanlad_file_path,
+          data,
+          ~ terra::extract(x = terra::rast(.x), y = terra::vect(.y)) %>% 
+              tibble::as_tibble() %>% 
+              dplyr::select(-ID) %>% 
+              dplyr::bind_cols(tibble::tibble(id = .y$id))
+        )
+      ) %>% 
+      # Clean-up and unnest
+      dplyr::select(precanlad_samples) %>% 
+      tidyr::unnest(cols = c(precanlad_samples))
+  
   # -------------------------------------------------------------------------- #
   # Step 3: Join forest vegetation/disturbances                             ####
   
@@ -106,6 +150,10 @@ sample_forest_variables <- function(
     dplyr::left_join(sampled_cutblocks, by = "id") %>% 
     # Left-join historical fire attributes
     dplyr::left_join(sampled_historical_fires, by = "id") %>% 
+    # Left-join CanLaD disturbance years
+    dplyr::left_join(sampled_canlad_disturbances, by = "id") %>% 
+    # Left-join pre-CanLaD disturbance years
+    dplyr::left_join(sampled_precanlad_disturbances, by = "id") %>% 
     # Left-join BC RESULTS disturbance attributes
     dplyr::left_join(bc_results_tbl, by = "id")
   
