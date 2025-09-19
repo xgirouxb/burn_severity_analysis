@@ -193,7 +193,7 @@ prep_vri_polygons <- function(
         # Else return their sum 
         rowSums(dplyr::across(dplyr::contains("_biomass_per_ha")), na.rm = TRUE)
       ),
-      # Weighted mean height/age of two leading species
+      # Weighted mean, min, and max age of two leading species
       mean_proj_age = dplyr::case_when(
         # If second species has no age, only use species 1
         !is.na(proj_age_1) & is.na(proj_age_2) ~ proj_age_1,
@@ -204,6 +204,9 @@ prep_vri_polygons <- function(
         # Else, return NA
         TRUE ~ NA_real_
       ),
+      min_proj_age = pmin(proj_age_1, proj_age_2, na.rm = TRUE),
+      max_proj_age = pmax(proj_age_1, proj_age_2, na.rm = TRUE),
+      # Weighted mean height of two leading species
       mean_proj_height = dplyr::case_when(
         # If second species has no height, only use species 1
         !is.na(proj_height_1) & is.na(proj_height_2) ~ proj_height_1,
@@ -237,6 +240,8 @@ prep_vri_polygons <- function(
       # Stand attributes
       mean_proj_height, # Mean projected height for 2 leading species
       mean_proj_age, # Weighted mean projected age for 2 leading species
+      min_proj_age, # Minimum projected age of 2 leading species
+      max_proj_age, # Maximum projected age of 2 leading species
       quad_diam_125, # Quadratic mean stand diameter (breast height)
       live_stand_volume_125, # Stand volume
       vri_live_stems_per_ha, # Stand density
