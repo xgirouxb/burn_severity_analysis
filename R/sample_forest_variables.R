@@ -93,16 +93,16 @@ sample_forest_variables <- function(
     dplyr::group_by(id, fire_id, fire_year) %>%
     dplyr::summarise(
       hf_fire_year = max(hf_fire_year),
-      hf_years_since_burn = unique(fire_year) - hf_fire_year,
+      hf_years_since_fire = unique(fire_year) - hf_fire_year,
       .groups = "drop"
     ) %>%
     # Clean-up
-    dplyr::select(id, hf_fire_year, hf_years_since_burn)
+    dplyr::select(id, hf_fire_year, hf_years_since_fire)
   
   ## 2.3 Sample CanLaD harvest (1985-2020) and fire disturbances ####
   sampled_canlad_disturbances <- burn_sample_points %>%
-    # Nest by study fire
-    dplyr::group_nest(fire_id) %>% 
+    # Nest by study fire and year
+    dplyr::group_nest(fire_id, fire_year) %>% 
     # Join table of CanLaD raster file names
     dplyr::left_join(canlad_disturbance_rasters, by = "fire_id") %>% 
     # Sample rasters
@@ -110,20 +110,20 @@ sample_forest_variables <- function(
       canlad_samples = purrr::map2(
         canlad_file_path,
         data,
-        ~ terra::extract(x = terra::rast(.x), y = terra::vect(.y)) %>% 
+        ~ terra::extract(x = terra::rast(paste(.x)), y = terra::vect(.y)) %>% 
             tibble::as_tibble() %>% 
             dplyr::select(-ID) %>% 
             dplyr::bind_cols(tibble::tibble(id = .y$id))
       )
     ) %>% 
     # Clean-up and unnest
-    dplyr::select(canlad_samples) %>% 
+    dplyr::select(fire_id, fire_year, canlad_samples) %>%
     tidyr::unnest(cols = c(canlad_samples))
 
     ## 2.4 Sample pre-CanLaD (1964-1984) harvest and fire disturbances ####
     sampled_precanlad_disturbances <- burn_sample_points %>%
-      # Nest by study fire
-      dplyr::group_nest(fire_id) %>% 
+      # Nest by study fire and year
+      dplyr::group_nest(fire_id, fire_year) %>% 
       # Join table of pre-CanLaD raster file names
       dplyr::left_join(precanlad_disturbance_rasters, by = "fire_id") %>% 
       # Sample rasters
@@ -131,15 +131,42 @@ sample_forest_variables <- function(
         precanlad_samples = purrr::map2(
           precanlad_file_path,
           data,
-          ~ terra::extract(x = terra::rast(.x), y = terra::vect(.y)) %>% 
+          ~ terra::extract(x = terra::rast(paste(.x)), y = terra::vect(.y)) %>% 
               tibble::as_tibble() %>% 
               dplyr::select(-ID) %>% 
               dplyr::bind_cols(tibble::tibble(id = .y$id))
         )
       ) %>% 
       # Clean-up and unnest
-      dplyr::select(precanlad_samples) %>% 
+      dplyr::select(fire_id, fire_year, precanlad_samples) %>%
       tidyr::unnest(cols = c(precanlad_samples))
+    
+    ## 2.5 Combined CanLaD and pre-CanLaD disturbance years
+    sampled_combined_canlad_disturbances <- dplyr::left_join(
+      sampled_canlad_disturbances,
+      sampled_precanlad_disturbances,
+      by = c("fire_id", "fire_year", "id")
+    ) %>% 
+      # Get most recent disturbance years from CanLaD and pre-CanLaD
+      dplyr::mutate(
+        canlad_fire_year = pmax(
+          precanlad_fire_year,
+          canlad_fire_year,
+          na.rm = TRUE
+        ),
+        canlad_years_since_fire = fire_year - canlad_fire_year,
+        canlad_harvest_year = pmax(
+          precanlad_harvest_year,
+          canlad_harvest_year,
+          na.rm = TRUE
+        ),
+        canlad_years_since_harvest = fire_year - canlad_harvest_year
+      ) %>% 
+      # Clean up
+      dplyr::select(
+        id, canlad_fire_year, canlad_years_since_fire,
+        canlad_harvest_year, canlad_years_since_harvest
+      )
   
   # -------------------------------------------------------------------------- #
   # Step 3: Join forest vegetation/disturbances                             ####
@@ -151,9 +178,7 @@ sample_forest_variables <- function(
     # Left-join historical fire attributes
     dplyr::left_join(sampled_historical_fires, by = "id") %>% 
     # Left-join CanLaD disturbance years
-    dplyr::left_join(sampled_canlad_disturbances, by = "id") %>% 
-    # Left-join pre-CanLaD disturbance years
-    dplyr::left_join(sampled_precanlad_disturbances, by = "id") %>% 
+    dplyr::left_join(sampled_combined_canlad_disturbances, by = "id") %>% 
     # Left-join BC RESULTS disturbance attributes
     dplyr::left_join(bc_results_tbl, by = "id")
   
