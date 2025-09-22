@@ -7,7 +7,8 @@ sample_forest_variables <- function(
     historical_fire_polygons,
     canlad_disturbance_rasters,
     precanlad_disturbance_rasters,
-    bc_results_tbl
+    bc_results_tbl,
+    topo_geo_tbl
 ) {
   
   # -------------------------------------------------------------------------- #
@@ -169,7 +170,7 @@ sample_forest_variables <- function(
       )
   
   # -------------------------------------------------------------------------- #
-  # Step 3: Join forest vegetation/disturbances                             ####
+  # Step 3: Join forest vegetation/disturbances and biogeo                  ####
   
   # Join sampled vegetation and disturbance data
   joined_forest_variables <- sampled_vegetation %>% 
@@ -180,7 +181,9 @@ sample_forest_variables <- function(
     # Left-join CanLaD disturbance years
     dplyr::left_join(sampled_combined_canlad_disturbances, by = "id") %>% 
     # Left-join BC RESULTS disturbance attributes
-    dplyr::left_join(bc_results_tbl, by = "id")
+    dplyr::left_join(bc_results_tbl, by = "id") %>% 
+    # Left-join topo and biogeo attributes
+    dplyr::left_join(topo_geo_tbl, by = "id")
   
   # -------------------------------------------------------------------------- #
   # Step 4: Remove samples with potentially biased burn ratios, return      ####

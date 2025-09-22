@@ -163,7 +163,8 @@ list(
       historical_fire_polygons,
       canlad_disturbance_rasters,
       precanlad_disturbance_rasters,
-      bc_results_tbl
+      bc_results_tbl,
+      topo_geo_tbl
     )
   )
 )
