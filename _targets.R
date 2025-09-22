@@ -166,5 +166,10 @@ list(
       bc_results_tbl,
       topo_geo_tbl
     )
+  ),
+  # Reclassify/impute VRI variables
+  tar_target(
+    name = imputed_forest_variables,
+    command = impute_forest_variables(forest_variables)
   )
 )
