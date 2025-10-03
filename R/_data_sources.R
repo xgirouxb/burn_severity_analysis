@@ -53,6 +53,12 @@ uuid_bc_cutblocks <- "b1b647a6-f271-42e0-9cd0-89ec24bce9f7"
 gee_assetid_land_cover <- "projects/sat-io/open-datasets/CA_FOREST_LC_VLCE2"
 
 # ---------------------------------------------------------------------------- #
+# Canada classification of forest management - 2017 and 2020
+# Metadata available at: https://open.canada.ca/data/en/dataset/d8fa9a38-c4df-442a-8319-9bbcbdc29060
+url_forest_management_2017 <- "https://ca.nfis.org/fss/fss?command=retrieveById&fss_id=xVtr6R4NLbwZtA7Q-Xt4Tg"
+url_forest_management_2020 <- "https://ca.nfis.org/fss/fss?command=retrieveById&fss_id=Anh-adILivU0opBCuud2oA"
+
+# ---------------------------------------------------------------------------- #
 # Burn sample points
 # Copy of local `burn_sample_points` target sf object uploaded to GEE assets 
 gee_assetid_sample_points <- "projects/ee-bc-burn-severity/assets/burn_sample_points"

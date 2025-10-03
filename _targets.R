@@ -120,6 +120,13 @@ list(
       burn_sample_points
     )
   ),
+  # Import NFIS forest tenure rasters
+  tar_target(
+    name = nfis_tenure_rasters,
+    command = get_nfis_forest_tenure_rasters(
+      study_fire_sampling_polygons
+    )
+  ),
   # Import topographic and biogeo variables
   tar_target(
     name = topo_geo_tbl,
