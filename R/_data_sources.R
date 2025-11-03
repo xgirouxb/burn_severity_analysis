@@ -41,6 +41,13 @@ url_vri_archive <- "https://pub.data.gov.bc.ca/datasets/02dba161-fdb7-48ae-a4bb-
 path_vri_species_key <- "data/vri_species_key.csv"
 
 # ---------------------------------------------------------------------------- #
+# British Columbia - RESULTS silvicultural openings
+# Metadata available at: https://catalogue.data.gov.bc.ca/dataset/results-openings-svw
+# Table of codes for attributes available at: https://www.for.gov.bc.ca/his/results/webhelp/index.htm#t=RESULTS%2FCode_Table%2Fcode_tables.htm
+# Dataset UUID can be found using bcdata::bcdc_search("results-openings-svw")
+uuid_results_openings <- "53a17fec-e9ad-4ac0-95e6-f5106a97e677"
+
+# ---------------------------------------------------------------------------- #
 # British Columbia - Consolidated cutblocks
 # Metadata available at: https://catalogue.data.gov.bc.ca/dataset/harvested-areas-of-bc-consolidated-cutblocks-
 # Dataset UUID can be found using bcdata::bcdc_search("consolidated cutblocks")

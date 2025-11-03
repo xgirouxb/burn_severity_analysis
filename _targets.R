@@ -102,6 +102,11 @@ list(
       vri_lyr_name = "LYR_D"
     )
   ),
+  # Import BC RESULTS openings for study years and fires
+  tar_targets(
+    name = results_openings_polygons,
+    command = get_results_openings_polygons(study_fire_sampling_polygons)
+  ),
   # Import land cover classes sampled via Google Earth Engine
   # e.g. https://code.earthengine.google.com/d78997162f4707f78ba8ad0f36572e31
   tar_target(
