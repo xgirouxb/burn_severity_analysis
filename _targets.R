@@ -103,7 +103,7 @@ list(
     )
   ),
   # Import BC RESULTS openings for study years and fires
-  tar_targets(
+  tar_target(
     name = results_openings_polygons,
     command = get_results_openings_polygons(study_fire_sampling_polygons)
   ),
