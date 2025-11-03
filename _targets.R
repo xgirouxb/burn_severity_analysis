@@ -107,6 +107,11 @@ list(
     name = results_openings_polygons,
     command = get_results_openings_polygons(study_fire_sampling_polygons)
   ),
+  # Import BC RESULTS plantings polygons for planted openings
+  tar_target(
+    name = results_plantings_polygons,
+    command = get_results_plantings_polygons(results_openings_polygons)
+  ),
   # Import land cover classes sampled via Google Earth Engine
   # e.g. https://code.earthengine.google.com/d78997162f4707f78ba8ad0f36572e31
   tar_target(

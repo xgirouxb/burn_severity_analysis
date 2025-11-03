@@ -48,6 +48,13 @@ path_vri_species_key <- "data/vri_species_key.csv"
 uuid_results_openings <- "53a17fec-e9ad-4ac0-95e6-f5106a97e677"
 
 # ---------------------------------------------------------------------------- #
+# British Columbia - RESULTS silvicultural forest cover
+# Metadata available at: https://catalogue.data.gov.bc.ca/dataset/results-planting
+# Table of codes for attributes available at: https://www.for.gov.bc.ca/his/results/webhelp/index.htm#t=RESULTS%2FCode_Table%2Fcode_tables.htm
+# Dataset UUID can be found using bcdata::bcdc_search("results-planting")
+uuid_results_plantings <- "3666c26a-32d8-43e4-b8ad-59a315c7d3ce"
+
+# ---------------------------------------------------------------------------- #
 # British Columbia - Consolidated cutblocks
 # Metadata available at: https://catalogue.data.gov.bc.ca/dataset/harvested-areas-of-bc-consolidated-cutblocks-
 # Dataset UUID can be found using bcdata::bcdc_search("consolidated cutblocks")

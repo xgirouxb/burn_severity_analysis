@@ -54,3 +54,55 @@ get_results_openings_polygons <- function(study_fire_sampling_polygons) {
   # Return
   return(results_openings_polygons)
 }
+
+get_results_plantings_polygons <- function(results_openings_polygons) {
+  
+  # Import BC RESULTS forest cover polygons that intersect with planted openings
+  results_planting_polygons <- results_openings_polygons %>% 
+    # Only retain openings with plantings
+    dplyr::filter(PLANTING_COUNT > 0) %>% 
+    # Split into chunks (to respect {bcdata} query size limits)
+    dplyr::mutate(chunk = dplyr::ntile(n = 50)) %>%
+    dplyr::group_split(chunk) %>% 
+    # Import polygons that intersect with each study fire's sampling area
+    purrr::map(
+      .f = ~{
+        
+        # Get opening ids for database query
+        opening_ids <- dplyr::pull(.x, OPENING_ID)
+        
+        # Filter RESULTS planting by OPENING_ID
+        plantings_retrieved <- bcdata::bcdc_query_geodata(uuid_results_plantings) %>%
+          dplyr::filter(OPENING_ID %in% opening_ids) %>% 
+          # Retrieve from database
+          bcdata::collect()
+        
+        # If no intersecting polygons, return NULL
+        if(nrow(plantings_retrieved) == 0) return(NULL)
+        
+        # Else, return parsed
+        plantings_retrieved %>%
+          # Add fire id and year
+          dplyr::mutate(
+            fire_id = dplyr::first(.x$fire_id),
+            fire_year = dplyr::first(.x$fire_year)
+          ) %>%
+          # Parse column data types
+          dplyr::mutate(
+            OPENING_ID = as.integer(OPENING_ID),
+            SILV_TREE_SPECIES_CODE = as.character(SILV_TREE_SPECIES_CODE),
+            NUMBER_PLANTED = as.integer(NUMBER_PLANTED)
+          ) %>% 
+          # Select attributes of interest
+          dplyr::select(
+            fire_id, fire_year,
+            OPENING_ID, SILV_TREE_SPECIES_CODE, NUMBER_PLANTED
+          )
+      }
+    ) %>% 
+    # List to table
+    dplyr::bind_rows()
+  
+  # Return
+  return(results_planting_polygons)
+}
