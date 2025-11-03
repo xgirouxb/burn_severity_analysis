@@ -102,7 +102,7 @@ list(
       vri_lyr_name = "LYR_D"
     )
   ),
-  # Import BC RESULTS openings for study years and fires
+  # Import BC RESULTS openings polygons for study years and fires
   tar_target(
     name = results_openings_polygons,
     command = get_results_openings_polygons(study_fire_sampling_polygons)
