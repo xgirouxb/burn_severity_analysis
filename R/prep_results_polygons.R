@@ -79,14 +79,17 @@ prep_results_polygons <- function(
           ),
         # ELSE return NA
         TRUE ~ NA
-      )
+      ),
+      # Convert harvest start/end dates to years
+      res_harvest_start_year = lubridate::year(res_harvest_start_date),
+      res_harvest_end_year = lubridate::year(res_harvest_end_date)
     ) %>% 
     # Select attributes of interest
     dplyr::select(
       # IDs 
       fire_id, fire_year, OPENING_ID,
-      # Harvest dates
-      res_harvest_start_date, res_harvest_end_date
+      # Harvest start/end years
+      res_harvest_start_year, res_harvest_end_year
     )
   
   # -------------------------------------------------------------------------- #
@@ -158,7 +161,7 @@ prep_results_polygons <- function(
       denudation2_year = lubridate::year(DENUDATION_2_COMPLETION_DATE),
       disturbance_start_year = lubridate::year(DISTURBANCE_START_DATE),
       approve_year = lubridate::year(APPROVE_DATE),
-      harvest_year = lubridate::year(res_harvest_end_date),
+      harvest_year = res_harvest_end_year,
       # Create planted logical flag
       is_planted = dplyr::if_else(
         PLANTING_COUNT == 0 | is.na(PLANTING_COUNT),
@@ -336,7 +339,7 @@ prep_results_polygons <- function(
       # ID
       fire_id, fire_year, res_opening_id = OPENING_ID,
       # Harvest
-      res_harvest_start_date, res_harvest_end_date,
+      res_harvest_start_year, res_harvest_end_year,
       # Fire
       res_fire1_year, res_fire2_year, res_fire_year,
       # Planting
