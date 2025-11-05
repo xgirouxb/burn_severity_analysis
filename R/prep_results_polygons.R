@@ -181,15 +181,15 @@ prep_results_polygons <- function(
       #     use latest denudation date (excluding burns corresponding to study
       #     or post-study fires)
       denudation_year = pmax(
-        # 1st denudation year (excluding burns associated to study fires)
+        # 1st denudation year (excluding burns for study or post-study fires)
         dplyr::if_else(
-          DENUDATION_1_DISTURBANCE_CODE == "B" & denudation1_year == fire_year,
+          DENUDATION_1_DISTURBANCE_CODE == "B" & denudation1_year >= fire_year,
           NA,
           denudation1_year
         ),
-        # 2nd denudation year (excluding burns associated to study fires)
+        # 2nd denudation year (excluding burns for study or post-study fires)
         dplyr::if_else(
-          DENUDATION_2_DISTURBANCE_CODE == "B" & denudation2_year == fire_year,
+          DENUDATION_2_DISTURBANCE_CODE == "B" & denudation2_year >= fire_year,
           NA,
           denudation2_year
         ),
