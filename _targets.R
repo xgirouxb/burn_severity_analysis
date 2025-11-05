@@ -158,6 +158,15 @@ list(
       vri_species_key
     )
   ),
+  # Prepare RESULTS openings and plantings polygons
+  tar_target(
+    name = results_polygons,
+    command = prep_results_polygons(
+      results_openings_polygons,
+      results_plantings_polygons,
+      vri_species_key
+    )
+  ),
   # Find samples with disturbances that interfere with burn ratios
   # (i.e., harvest/fire in 1 year window around study fire)
   tar_target(
