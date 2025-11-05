@@ -174,7 +174,8 @@ list(
     command = find_biased_burn_ratio_sample_ids(
       burn_sample_points,
       cutblock_polygons,
-      historical_fire_polygons
+      historical_fire_polygons,
+      results_polygons
     )
   ),
   # Sample forest variables: vegetation, land cover, and harvest/fire
