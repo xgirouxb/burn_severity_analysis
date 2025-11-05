@@ -49,6 +49,7 @@ get_results_openings_polygons <- function(study_fire_sampling_polygons) {
           )
       }
     ) %>%
+    # Convert list to sf
     dplyr::bind_rows()
   
   # Return
@@ -100,7 +101,7 @@ get_results_plantings_polygons <- function(results_openings_polygons) {
           )
       }
     ) %>% 
-    # List to table
+    # Convert list to sf
     dplyr::bind_rows()
   
   # Return
