@@ -81,7 +81,9 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
                   # Spatial query using WKT 
                   wkt_filter = sf::st_as_text(sf::st_geometry(.x)),
                   # Silence outputs
-                  quiet = TRUE
+                  quiet = TRUE,
+                  # Output tibble instead of data.frame
+                  as_tibble = TRUE
                 ) %>% 
                   # Add fire_id as field
                   dplyr::mutate(fire_id = .x$fire_id)
@@ -102,7 +104,7 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
     ) %>% 
     # Get list of fire polygons
     dplyr::pull(sf_poly) %>% 
-    # Bind_rows
+    # Convert list to sf
     dplyr::bind_rows() %>% 
     # Cast dttm columns to UTC
     dplyr::mutate(
