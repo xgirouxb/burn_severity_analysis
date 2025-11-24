@@ -67,10 +67,10 @@ uuid_bc_cutblocks <- "b1b647a6-f271-42e0-9cd0-89ec24bce9f7"
 gee_assetid_land_cover <- "projects/sat-io/open-datasets/CA_FOREST_LC_VLCE2"
 
 # ---------------------------------------------------------------------------- #
-# Canada classification of forest management - 2017 and 2020
+# Canadian Council of Forest Minister's forest tenure maps - 2017 and 2020
 # Metadata available at: https://open.canada.ca/data/en/dataset/d8fa9a38-c4df-442a-8319-9bbcbdc29060
-url_forest_management_2017 <- "https://ca.nfis.org/fss/fss?command=retrieveById&fss_id=xVtr6R4NLbwZtA7Q-Xt4Tg"
-url_forest_management_2020 <- "https://ca.nfis.org/fss/fss?command=retrieveById&fss_id=Anh-adILivU0opBCuud2oA"
+url_ccfm_forest_tenure_2017 <- "https://ca.nfis.org/fss/fss?command=retrieveById&fss_id=xVtr6R4NLbwZtA7Q-Xt4Tg"
+url_ccfm_forest_tenure_2020 <- "https://ca.nfis.org/fss/fss?command=retrieveById&fss_id=Anh-adILivU0opBCuud2oA"
 
 # ---------------------------------------------------------------------------- #
 # Burn sample points

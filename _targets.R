@@ -130,10 +130,10 @@ list(
       burn_sample_points
     )
   ),
-  # Import NFIS forest tenure rasters
+  # Import CCFM forest tenure rasters
   tar_target(
-    name = nfis_tenure_rasters,
-    command = get_nfis_forest_tenure_rasters(
+    name = ccfm_tenure_rasters,
+    command = get_ccfm_forest_tenure_rasters(
       study_fire_sampling_polygons
     )
   ),
