@@ -207,6 +207,7 @@ prep_results_polygons <- function(
       #     relevant disturbances are missing (n = 1 logging, n = 2 pest). 
       #     Typical chronology where "L": approval --> logging --> planting 
       #     Typical chronology where "P": pest --> approval --> planting
+      #     Typical chronology where "R": approval --> rehab --> planting 
       edge_case_year = dplyr::case_when(
         # IF denudation 1 is logging (L) and there is no completion date
         DENUDATION_1_DISTURBANCE_CODE == "L" & is.na(denudation1_year) ~
@@ -214,6 +215,10 @@ prep_results_polygons <- function(
           harvest_year,
         # ELSE IF denudation 1 is pest (P) and there is no completion date
         DENUDATION_1_DISTURBANCE_CODE == "P" & is.na(denudation1_year) ~
+          # ASSIGN latest between approval and disturbance start
+          pmax(disturbance_start_year, approve_year, na.rm = TRUE),
+        # ELSE IF denudation 1 is rehab (R) and there is no completion date
+        DENUDATION_1_DISTURBANCE_CODE == "R" & is.na(denudation1_year) ~
           # ASSIGN latest between approval and disturbance start
           pmax(disturbance_start_year, approve_year, na.rm = TRUE),
         # ELSE
