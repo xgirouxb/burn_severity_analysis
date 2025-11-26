@@ -2,6 +2,8 @@ get_cutblock_polygons <- function(study_fire_sampling_polygons){
 
   # Import BC consolidated cutblocks that intersect study fires
   cutblock_polygons <- study_fire_sampling_polygons %>%
+    # Add 10-km buffer for downstream neighbourhood variables
+    sf::st_buffer(dist = 10000) %>% 
     # Nest by fire (to respect {bcdata} spatial query size limits)
     dplyr::group_split(fire_id) %>%
     # Import cutblocks that intersect with each study fire's sampling area

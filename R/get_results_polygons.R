@@ -2,6 +2,8 @@ get_results_openings_polygons <- function(study_fire_sampling_polygons) {
   
   # Import BC RESULTS openings polygons that intersect study fires
   results_openings_polygons <- study_fire_sampling_polygons %>%
+    # Add 10-km buffer for downstream neighbourhood variables
+    sf::st_buffer(dist = 10000) %>% 
     # Nest by fire (to respect {bcdata} spatial query size limits)
     dplyr::group_split(fire_id) %>%
     # Import polygons that intersect with each study fire's sampling area
@@ -9,7 +11,9 @@ get_results_openings_polygons <- function(study_fire_sampling_polygons) {
       .f = ~{
         
         # Spatially filter RESULTS openings that intersect fire polygons
-        openings_retrieved <- bcdata::bcdc_query_geodata(uuid_results_openings) %>%
+        openings_retrieved <- bcdata::bcdc_query_geodata(
+          uuid_results_openings
+        ) %>%
           dplyr::filter(bcdata::INTERSECTS(.x)) %>%
           # Retrieved from database
           bcdata::collect()
@@ -63,7 +67,7 @@ get_results_plantings_polygons <- function(results_openings_polygons) {
     # Only retain openings with plantings
     dplyr::filter(PLANTING_COUNT > 0) %>% 
     # Split into chunks (to respect {bcdata} query size limits)
-    dplyr::mutate(chunk = dplyr::ntile(n = 50)) %>%
+    dplyr::mutate(chunk = dplyr::ntile(n = 100)) %>%
     dplyr::group_split(chunk) %>% 
     # Import polygons that intersect with each study fire's sampling area
     purrr::map(
@@ -73,7 +77,9 @@ get_results_plantings_polygons <- function(results_openings_polygons) {
         opening_ids <- dplyr::pull(.x, OPENING_ID)
         
         # Filter RESULTS planting by OPENING_ID
-        plantings_retrieved <- bcdata::bcdc_query_geodata(uuid_results_plantings) %>%
+        plantings_retrieved <- bcdata::bcdc_query_geodata(
+          uuid_results_plantings
+        ) %>%
           dplyr::filter(OPENING_ID %in% opening_ids) %>% 
           # Retrieve from database
           bcdata::collect()

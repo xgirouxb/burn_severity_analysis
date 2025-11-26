@@ -28,7 +28,11 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
       hf_fire_year = YEAR,
     ) %>% 
     # Spatial inner join to filter historical fires that intersect study fires
-    sf::st_join(y = study_fire_sampling_polygons, left = FALSE) %>% 
+    sf::st_join(
+      # Add 10-km buffer for downstream neighbourhood variables
+      y = sf::st_buffer(study_fire_sampling_polygons, dist = 10000),
+      left = FALSE
+    ) %>% 
     # Retain unique historical fires (some fires may intersect > 1 study fire)
     dplyr::distinct(hf_fire_id, .keep_all = TRUE) %>% 
     # Dissolve into single MULTIPOLYGON for each historical fire
@@ -56,7 +60,11 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
       hf_fire_year = FIRE_YEAR,
     ) %>%
     # Spatial inner join to filter historical fires that intersect study fires
-    sf::st_join(y = study_fire_sampling_polygons, left = FALSE) %>% 
+    sf::st_join(
+      # Add 10-km buffer for downstream neighbourhood variables
+      y = sf::st_buffer(study_fire_sampling_polygons, dist = 10000),
+      left = FALSE
+    ) %>% 
     # Retain unique historical fires (some fires may intersect > 1 study fire)
     dplyr::distinct(hf_fire_id, .keep_all = TRUE) %>%  
     # Dissolve into single MULTIPOLYGON for each historical fire
