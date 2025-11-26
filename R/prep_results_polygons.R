@@ -107,8 +107,11 @@ prep_results_polygons <- function(
         # ELSE IF denudation 2 IS burned and denudation 1 IS NOT burned
         DENUDATION_2_DISTURBANCE_CODE == "B" &
           DENUDATION_1_DISTURBANCE_CODE != "B" ~
-          # ASSIGN denudation 2 completion date
-          DENUDATION_2_COMPLETION_DATE,
+          # ASSIGN denudation 2 completion date, if NA use study fire date
+          dplyr::coalesce(
+            DENUDATION_2_COMPLETION_DATE, 
+            lubridate::make_date(fire_year, 1, 1)
+          ),
         # ELSE return NA
         TRUE ~ NA
       ),
