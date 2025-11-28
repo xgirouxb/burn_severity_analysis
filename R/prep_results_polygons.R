@@ -301,8 +301,8 @@ prep_results_polygons <- function(
       .groups = "drop"
     ) %>% 
     # Pool rare species
-    # NB: Not all these are planted species, they are included here for  
-    #     consistency with VRI pooling method
+    # NB: Not all these are planted species, they are included here verbatim  
+    #     from the VRI pooling method for consistency
     dplyr::mutate(
       res_lead_spp = dplyr::case_when(
         # Other deciduous
