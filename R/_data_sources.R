@@ -48,7 +48,7 @@ path_vri_species_key <- "data/vri_species_key.csv"
 uuid_results_openings <- "53a17fec-e9ad-4ac0-95e6-f5106a97e677"
 
 # ---------------------------------------------------------------------------- #
-# British Columbia - RESULTS silvicultural forest cover
+# British Columbia - RESULTS planting activities
 # Metadata available at: https://catalogue.data.gov.bc.ca/dataset/results-planting
 # Table of codes for attributes available at: https://www.for.gov.bc.ca/his/results/webhelp/index.htm#t=RESULTS%2FCode_Table%2Fcode_tables.htm
 # Dataset UUID can be found using bcdata::bcdc_search("results-planting")
