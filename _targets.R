@@ -167,7 +167,17 @@ list(
       vri_species_key
     )
   ),
-  # Find samples with disturbances that interfere with burn ratios
+  # Prepare forest management rasters
+  tar_target(
+    name = forest_management_rasters,
+    command = prep_forest_management_rasters(
+      study_fire_sampling_polygons,
+      cutblock_polygons,
+      historical_fire_polygons,
+      results_polygons
+    )
+  ),
+  # Find samples with disturbances that may interfere with burn ratios
   # (i.e., harvest/fire in 1 year window around study fire)
   tar_target(
     name = biased_burn_ratio_sample_ids,
