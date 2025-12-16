@@ -55,6 +55,11 @@ list(
       study_fire_sampling_polygons
     )
   ),
+  # Import topography metric rasters
+  tar_target(
+    name = topography_rasters,
+    command = get_topography_rasters(study_fire_sampling_polygons)
+  ),
   # Import BC consolidated cutblocks that intersect study fire sampling polygons
   tar_target(
     name = cutblock_polygons,
