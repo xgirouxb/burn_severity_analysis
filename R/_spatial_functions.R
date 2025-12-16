@@ -59,6 +59,26 @@ delete_holes <- function(sf_poly) {
   return(sf_poly_outer)
 }
 
+#' Na-proof maximum  
+#'
+#' This function calculates the maximum value of a vector while ignoring `NA`
+#' values. Unlike the standard [base::max()], this function returns `NA` 
+#' instead of `-Inf` when the input vector contains only `NA` values or is empty.
+#'
+#' @param x A numeric value or vector.
+#'
+#' @return 
+#' A single numeric value representing the maximum, or `NA` if no 
+#' non-missing values are present.
+#' 
+#' @examples
+#' maximum(c(1, 5, 2, NA))
+#' # [1] 5
+#' 
+#' maximum(c(NA, NA))
+#' # [1] NA
+maximum <- function(x) { ifelse(all(is.na(x)), NA, max(x, na.rm = TRUE)) }
+
 #' Compute the Terrain Ruggedness Index (TRI) within a neighborhood window
 #'
 #' This function calculates the Terrain Ruggedness Index (TRI) in a neighboorhood
