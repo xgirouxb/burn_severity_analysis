@@ -297,7 +297,8 @@ prep_results_polygons <- function(
     dplyr::arrange(dplyr::desc(n), .by_group = TRUE) %>%
     # Get leading planted species, ungroup
     dplyr::summarise(
-      res_lead_spp = dplyr::first(common_genus),
+      # Use first non-NA common_genus in order of prevalence
+      res_lead_spp = dplyr::first(common_genus, na_rm = TRUE),
       .groups = "drop"
     ) %>% 
     # Pool rare species
