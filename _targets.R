@@ -55,6 +55,11 @@ list(
       study_fire_sampling_polygons
     )
   ),
+  # Import NRCAN Canada Vegetation Zones polygons
+  tar_target(
+    name = vegetation_zone_polygons,
+    command = get_vegetation_zone_polygons(study_fire_sampling_polygons)
+  ),
   # Import topography metric rasters
   tar_target(
     name = topography_rasters,

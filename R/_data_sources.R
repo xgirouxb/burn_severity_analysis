@@ -14,6 +14,12 @@ url_nbac_archive <- "https://cwfis.cfs.nrcan.gc.ca/downloads/nbac/"
 # NRCAN Digital Surface Model cloud optimized GeoTIFF 
 # Metadata available at: https://app.geo.ca/en-ca/map-browser/record/18752265-bda3-498c-a4ba-9dfe68cb98da
 url_nrcan_elevation <- "https://canelevation-dem.s3.ca-central-1.amazonaws.com/mrdem-30/mrdem-30-dsm.tif"
+# ---------------------------------------------------------------------------- #
+# NRCAN Canadian Vegetation Zones (CVZ) polygons
+# Metadata available at: https://open.canada.ca/data/en/dataset/22b0166b-9db3-46b7-9baf-6584a3acc7b1
+url_nrcan_vegetation_zones <- "https://ftp.maps.canada.ca/pub/nrcan_rncan/Ecology_Ecologie/vegetation_zones_of_canada_dwld/vegetation_zones_of_canada_2020_shp.zip"
+
+# ---------------------------------------------------------------------------- #
 
 # ---------------------------------------------------------------------------- #
 # British Columbia - Historical Wildfire Fire Perimeters 
