@@ -50,8 +50,8 @@ list(
   # Import burn sample points from raw BC fire dataset (MGH)
   tar_target(
     name = burn_sample_points,
-    command = get_bc_burn_sample_points(
-      path_fire_data, 
+    command = get_burn_sample_points(
+      path_fire_data,
       study_fire_sampling_polygons
     )
   ),
