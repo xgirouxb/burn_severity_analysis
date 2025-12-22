@@ -43,12 +43,8 @@ get_canlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
     purrr::map(
       function(study_fire) {
         
-        # Study fire attributes
-        fire_year <- study_fire$fire_year
-        fire_id <- study_fire$fire_id
-        
         # Define year range for CanLaD stack (1985 to 1 year before study fire)
-        years <- 1985:(max(fire_year) - 1)
+        years <- 1985:(max(study_fire$fire_year) - 1)
         
         # Subset CanLaD raster stack paths
         stack_paths <- stringr::str_subset(
@@ -91,7 +87,10 @@ get_canlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
         names(canlad_harvest_year) <- "canlad_harvest_year"
         
         # File name and path for writing raster to file
-        raster_file_path <- fs::path(canlad_cache, paste0(fire_id, ".tif"))
+        raster_file_path <- fs::path(
+          canlad_cache,
+          paste0(study_fire$fire_id, ".tif")
+        )
         
         # Write fire and harvest disturbance years to file  
         terra::writeRaster(
@@ -108,7 +107,7 @@ get_canlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
         
         # Return tbl of raster file path
         tibble::tibble(
-          fire_id = fire_id,
+          fire_id = study_fire$fire_id,
           raster_file_path = raster_file_path
         )
       }
@@ -164,10 +163,6 @@ get_precanlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
     purrr::map(
       function(study_fire) {
         
-        # Study fire attributes
-        fire_year <- study_fire$fire_year
-        fire_id <- study_fire$fire_id
-        
         # Reproject fire to CanLaD projection
         fire_lambert <- terra::project(terra::vect(study_fire), precanlad_proj)
         
@@ -196,7 +191,10 @@ get_precanlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
         names(precanlad_harvest_year) <- "precanlad_harvest_year"
         
         # File name and path for writing to file
-        raster_file_path <- fs::path(precanlad_cache, paste0(fire_id, ".tif"))
+        raster_file_path <- fs::path(
+          precanlad_cache,
+          paste0(study_fire$fire_id, ".tif")
+        )
         
         # Write fire and harvest disturbance years to file  
         terra::writeRaster(
@@ -213,7 +211,7 @@ get_precanlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
         
         # Return tbl of raster file path
         tibble::tibble(
-          fire_id = fire_id,
+          fire_id = study_fire$fire_id,
           raster_file_path = raster_file_path
         )
       }
