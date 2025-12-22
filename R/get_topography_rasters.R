@@ -1,6 +1,4 @@
-get_topography_rasters <- function(
-    study_fire_sampling_polygons
-){
+get_topography_rasters <- function(study_fire_sampling_polygons) {
   
   # Define local cache directory for output rasters, create if it doesn't exist
   topo_cache <- fs::path("data/_cache/topographic_metrics")
@@ -18,9 +16,10 @@ get_topography_rasters <- function(
     dplyr::group_split(fire_id) %>% 
     # Extract digital surface model for each study fire and compute topo metrics
     purrr::map(
-      ~{
-        # Reproject study fire polygon and buffer to eliminate edge effects
-        aoi_buf <- terra::project(x = terra::vect(.x), y = nrcan_proj) %>% 
+      function(study_fire) {
+        # Reproject study fire polygon and add buffer to eliminate edge effects
+        aoi_buf <- terra::vect(study_fire) %>% 
+          terra::project(y = nrcan_proj) %>% 
           terra::buffer(1060)
 
         # Crop NRCAN DSM to buffered study fire area, reproject to study proj
@@ -62,10 +61,13 @@ get_topography_rasters <- function(
         # Combine topographic layers into SpatRast
         topography_raster <- c(dem, slope, pdir, topo_metrics) %>% 
           # Mask to study fire area
-          terra::crop(y = .x, mask = TRUE)
+          terra::crop(y = study_fire, mask = TRUE)
 
         # File path for writing raster to file
-        raster_file_path <- fs::path(topo_cache, paste0(.x$fire_id, ".tif"))
+        raster_file_path <- fs::path(
+          topo_cache,
+          paste0(study_fire$fire_id, ".tif")
+        )
         
         # Write topography metrics raster to file  
         terra::writeRaster(
@@ -77,7 +79,7 @@ get_topography_rasters <- function(
         
         # Return tbl of raster file path
         tibble::tibble(
-          fire_id = .x$fire_id,
+          fire_id = study_fire$fire_id,
           raster_file_path = raster_file_path
         )
       }
