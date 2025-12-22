@@ -8,25 +8,25 @@ get_results_openings_polygons <- function(study_fire_sampling_polygons) {
     dplyr::group_split(fire_id) %>%
     # Import polygons that intersect with each study fire's sampling area
     purrr::map(
-      .f = ~{
+      function(study_fire) {
         
         # Spatially filter RESULTS openings that intersect fire polygons
         openings_retrieved <- bcdata::bcdc_query_geodata(
           uuid_results_openings
         ) %>%
-          dplyr::filter(bcdata::INTERSECTS(.x)) %>%
+          dplyr::filter(bcdata::INTERSECTS(study_fire)) %>%
           # Retrieved from database
           bcdata::collect()
         
         # If no intersecting polygons, return NULL
-        if(nrow(openings_retrieved) == 0) return(NULL)
+        if (nrow(openings_retrieved) == 0) { return(NULL) }
         
-        # Else, return parsed
-        openings_retrieved %>%
+        # Else, return parsed openings
+        openings_retrieved <- openings_retrieved %>%
           # Add fire id and year
           dplyr::mutate(
-            fire_id = dplyr::first(.x$fire_id),
-            fire_year = dplyr::first(.x$fire_year)
+            fire_id = unique(study_fire$fire_id),
+            fire_year = unique(study_fire$fire_year)
           ) %>%
           # Parse column data types
           dplyr::mutate(
@@ -51,6 +51,7 @@ get_results_openings_polygons <- function(study_fire_sampling_polygons) {
             PLANTING_2_TECHNIQUE_CODE, PLANTING_2_COMPLETION_DATE,
             PLANTING_COUNT
           )
+        return(openings_retrieved)
       }
     ) %>%
     # Convert list to sf
@@ -63,20 +64,23 @@ get_results_openings_polygons <- function(study_fire_sampling_polygons) {
 get_results_plantings_polygons <- function(results_openings_polygons) {
   
   # Import BC RESULTS forest cover polygons that intersect with planted openings
-  results_planting_polygons <- results_openings_polygons %>% 
+  results_planting_polygons <- results_openings_polygons %>%
     # Only retain openings with plantings
     dplyr::filter(PLANTING_COUNT > 0) %>% 
-    # Split into chunks (to respect {bcdata} query size limits)
-    dplyr::mutate(chunk = dplyr::ntile(n = 100)) %>%
-    dplyr::group_split(chunk) %>% 
+    # Split into chunks of with max 1000 openings within each fire
+    # (to respect {bcdata} query size limits)
+    dplyr::group_by(fire_id) %>%
+    dplyr::mutate(chunk = dplyr::ntile(n = ceiling(dplyr::n()/1000))) %>%
+    dplyr::ungroup() %>% 
+    dplyr::group_split(fire_id, chunk) %>% 
     # Import polygons that intersect with each study fire's sampling area
     purrr::map(
-      .f = ~{
+      function(study_fire_openings_chunk) {
         
         # Get opening ids for database query
-        opening_ids <- dplyr::pull(.x, OPENING_ID)
+        opening_ids <- dplyr::pull(study_fire_openings_chunk, OPENING_ID)
         
-        # Filter RESULTS planting by OPENING_ID
+        # Filter RESULTS plantings by OPENING_ID
         plantings_retrieved <- bcdata::bcdc_query_geodata(
           uuid_results_plantings
         ) %>%
@@ -85,14 +89,14 @@ get_results_plantings_polygons <- function(results_openings_polygons) {
           bcdata::collect()
         
         # If no intersecting polygons, return NULL
-        if(nrow(plantings_retrieved) == 0) return(NULL)
+        if (nrow(plantings_retrieved) == 0) { return(NULL) }
         
-        # Else, return parsed
-        plantings_retrieved %>%
+        # Else, return parsed plantings
+        plantings_retrieved <- plantings_retrieved %>%
           # Add fire id and year
           dplyr::mutate(
-            fire_id = dplyr::first(.x$fire_id),
-            fire_year = dplyr::first(.x$fire_year)
+            fire_id = unique(study_fire_openings_chunk$fire_id),
+            fire_year = unique(study_fire_openings_chunk$fire_year)
           ) %>%
           # Parse column data types
           dplyr::mutate(
@@ -105,6 +109,7 @@ get_results_plantings_polygons <- function(results_openings_polygons) {
             fire_id, fire_year,
             OPENING_ID, SILV_TREE_SPECIES_CODE, NUMBER_PLANTED
           )
+        return(plantings_retrieved)
       }
     ) %>% 
     # Convert list to sf
