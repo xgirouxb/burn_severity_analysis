@@ -6,16 +6,19 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
   # Get NBAC archive URLs for all years between 1973 (start of archive)
   # and the year after the last study year
   list_nbac_subdir <- purrr::map(
-    .x = 1973:(max(study_years) + 1),
-    .f = ~{ 
-      get_url_list(url = url_nbac_archive, match_string = paste0("NBAC_", .x)) 
+    1973:(max(study_years) + 1),
+    function(year) { 
+      get_url_list(
+        url = url_nbac_archive,
+        match_string = paste0("NBAC_", year)
+      ) 
     }
   )
 
   # Import NBAC fire polygons for British Columbia
   hist_nbac_fire_polygons <- purrr::map(
-    .x = list_nbac_subdir,
-    .f = ~{ get_sf_from_source(sf_source = .x) }
+    list_nbac_subdir,
+    function(nbac_subdir) { get_sf_from_source(sf_source = nbac_subdir) }
   ) %>% 
     # Bind rows
     dplyr::bind_rows() %>% 
@@ -69,7 +72,7 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
     dplyr::distinct(hf_fire_id, .keep_all = TRUE) %>%  
     # Dissolve into single MULTIPOLYGON for each historical fire
     dplyr::group_by(hf_fire_src, hf_fire_id, hf_fire_year) %>%
-    dplyr::summarize(geometry = sf::st_union(geometry), .groups = "drop") %>%
+    dplyr::summarise(geometry = sf::st_union(geometry), .groups = "drop") %>%
     # Fix topology errors
     sf::st_make_valid() %>%
     sf::st_cast("MULTIPOLYGON")

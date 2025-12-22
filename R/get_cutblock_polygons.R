@@ -8,17 +8,17 @@ get_cutblock_polygons <- function(study_fire_sampling_polygons){
     dplyr::group_split(fire_id) %>%
     # Import cutblocks that intersect with each study fire's sampling area
     purrr::map(
-      .f = ~{
+      function(study_fire) {
         # Spatially filter cutblocks that intersect fire polygons
         cutblocks_retrieved <- bcdata::bcdc_query_geodata(uuid_bc_cutblocks) %>%
-          dplyr::filter(bcdata::INTERSECTS(.x)) %>%
+          dplyr::filter(bcdata::INTERSECTS(study_fire)) %>%
           bcdata::collect() 
         
         # If there are no cutblocks intersecting fire, return NULL
-        if (nrow(cutblocks_retrieved) == 0 ) return(NULL)
+        if (nrow(cutblocks_retrieved) == 0 ) { return(NULL) }
         
         # Else clean up attributes of interest
-        cutblocks_retrieved %>%
+        cutblocks_retrieved <- cutblocks_retrieved %>%
           # Clean names
           janitor::clean_names() %>% 
           # Coerce datatypes to fix errors when some tibble columns are all NAs
@@ -47,6 +47,7 @@ get_cutblock_polygons <- function(study_fire_sampling_polygons){
             # Geometry
             geometry
           )
+        return(cutblocks_retrieved)
       }
     ) %>%
     # Unnest
