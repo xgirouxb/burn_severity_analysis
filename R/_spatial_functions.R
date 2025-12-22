@@ -117,7 +117,7 @@ compute_tri <- function(
   
   # Check window type 
   if (!window %in% c("circle", "rectangle")) {
-    stop("`type` must be either 'circle' or 'rectangle'.")
+    stop("`window` must be either 'circle' or 'rectangle'.")
   }
   
   # Define window, set weights to 1 and NA
@@ -178,7 +178,7 @@ compute_tpi <- function(
   
   # Check window type 
   if (!window %in% c("circle", "rectangle")) {
-    stop("`type` must be either 'circle' or 'rectangle'.")
+    stop("`window` must be either 'circle' or 'rectangle'.")
   }
   
   # Define neighbourhood window, set weights to 1 and 0
