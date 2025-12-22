@@ -9,8 +9,8 @@ get_biogeoclimatic_zone_polygons <- function(study_fire_sampling_polygons) {
     # Dissolve into single MULTIPOLYGON for each BGZ
     dplyr::group_by(ZONE_NAME) %>% 
     dplyr::summarise(
-      bgz = dplyr::first(ZONE),
-      bgz_name = dplyr::first(ZONE_NAME),
+      bgz = unique(ZONE),
+      bgz_name = unique(ZONE_NAME),
       geometry = sf::st_union(geometry),
       .groups = "drop"
     ) %>%
