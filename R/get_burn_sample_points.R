@@ -1,4 +1,4 @@
-get_bc_burn_sample_points <- function(
+get_burn_sample_points <- function(
     path_fire_data,
     study_fire_sampling_polygons
 ){
@@ -28,7 +28,7 @@ get_bc_burn_sample_points <- function(
   
   # Convert to simple feature
   burn_sample_points <- raw_data %>% 
-    sf::st_as_sf(coords = c("x_3005", "y_3005"), crs = "EPSG:3005") %>% 
+    sf::st_as_sf(coords = c("x_3005", "y_3005"), crs = study_proj) %>% 
     # Remove sampling points that do not fall within fire sampling polygons
     sf::st_filter(study_fire_sampling_polygons)
   
