@@ -20,22 +20,24 @@ delete_holes <- function(sf_poly) {
   
   # Map over each polygon
   list_sf_poly_outer <- purrr::map(
-    .x = list_sf_poly,
-    .f = ~{
+    list_sf_poly,
+    function(sf_poly) {
       
       # Map over each element of geometry and select outer ring
       outer_rings <- purrr::map(
-        sf::st_geometry(.x),
-        ~ sf::st_multipolygon(purrr::map(.x, ~ list(.x[[1]])))
+        sf::st_geometry(sf_poly),
+        function(geoms) {
+          sf::st_multipolygon(purrr::map(geoms, function(x) { list(x[[1]]) }))
+        }
       )
       
       # Replace input geometries with outer rings
-      output_sf <- .x %>% 
+      output_sf <- sf_poly %>% 
         # Remove current geometry
         dplyr::select(-geometry) %>% 
         # Replace with sfc of outer rings
         dplyr::mutate(
-          geometry = sf::st_sfc(outer_rings, crs = sf::st_crs(.x))
+          geometry = sf::st_sfc(outer_rings, crs = sf::st_crs(sf_poly))
         ) %>% 
         # Set geometry column
         sf::st_set_geometry("geometry") %>% 
@@ -44,7 +46,7 @@ delete_holes <- function(sf_poly) {
         sf::st_buffer(0)
       
       # Return
-      output_sf
+      return(output_sf)
     }
   )
   
