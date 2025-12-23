@@ -5,16 +5,23 @@ get_study_fire_polygons <- function(study_area, study_years) {
   
   # Get NBAC archive URLs for study years
   list_nbac_subdir <- purrr::map(
-      .x = study_years,
-      .f = ~{ 
-        get_url_list(url = url_nbac_archive, match_string = paste0("NBAC_", .x)) 
+      study_years,
+      function(study_year) { 
+        get_url_list(
+          url = url_nbac_archive,
+          match_string = paste0("NBAC_", study_year)) 
       }
   )
   
   # Get NBAC fire polygons that intersect with study area
   list_nbac_fire_polygons <- purrr::map(
-    .x = list_nbac_subdir,
-    .f = ~{ get_sf_from_source(sf_source = .x, sf_aoi = study_area) }
+    list_nbac_subdir,
+    function(nbac_subdir) { 
+      get_sf_from_source(
+        sf_source = nbac_subdir,
+        sf_aoi = study_area
+      ) 
+    }
   )
   
   # Bind list to single sf obj of fire polygons
@@ -28,10 +35,10 @@ get_study_fire_polygons <- function(study_area, study_years) {
     # Dissolve into single MULTIPOLYGON for each fire
     dplyr::group_by(fire_id) %>%
     dplyr::summarize(
-      fire_id = dplyr::first(fire_id),
-      fire_year = dplyr::first(YEAR),
-      fire_start_date = dplyr::first(HS_SDATE),
-      fire_end_date = dplyr::first(HS_EDATE),
+      fire_id = unique(fire_id),
+      fire_year = unique(YEAR),
+      fire_start_date = unique(HS_SDATE),
+      fire_end_date = unique(HS_EDATE),
       fire_burn_area_ha = sum(POLY_HA),
       geometry = sf::st_union(geometry),
       .groups = "drop"
