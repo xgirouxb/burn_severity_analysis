@@ -83,7 +83,9 @@ get_ccfm_forest_tenure_rasters <- function(
           raster_file_path = raster_file_path
         )
       }
-    )
+    ) %>% 
+    # Convert list to tibble
+    purrr::list_rbind()
   
   # Return list of CCFM forest tenure raster file names
   return(ccfm_tenure_paths)
