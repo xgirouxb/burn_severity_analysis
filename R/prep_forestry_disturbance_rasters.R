@@ -15,43 +15,40 @@ prep_forestry_disturbance_rasters <- function(
     dplyr::group_split(fire_id) %>%
     # Create list of forestry disturbance rasters written to cache
     purrr::map(
-      ~ {
-        # ------------------------------------------------------------------ #
+      function(study_fire) {
+        
+        # -------------------------------------------------------------------- #
         # Step 0: Setup ####
         
         # Define maximum of 10 km for distance/neighbourhood functions
         max_dist <- 10000
         
-        # Define study fire variables for clearer syntax below
-        sf_aoi <- .x
-        sf_aoi_buf <- sf::st_buffer(sf_aoi, max_dist)
-        v_aoi <- terra::vect(sf_aoi)
-        v_aoi_buf <- terra::vect(sf_aoi_buf)
-        study_fire_id <- .x$fire_id
-        study_fire_year <- .x$fire_year
-
-        # Create template raster at 30-m resolution 
-        template_raster <- terra::rast(v_aoi_buf, resolution = 30, vals = 1) %>% 
-          # Mask to buffered study fire area
-          terra::crop(v_aoi_buf, mask = TRUE)
+        # Get study fire attributes for clearer syntax below
+        aoi_buf <- terra::buffer(x = terra::vect(study_fire), width = max_dist)
         
-        # ------------------------------------------------------------------ #
+        # Create template raster at 30-m resolution 
+        template_raster <- terra::rast(aoi_buf, resolution = 30, vals = 1) %>% 
+          # Mask to buffered study fire area
+          terra::crop(aoi_buf, mask = TRUE)
+        
+        # -------------------------------------------------------------------- #
         # Step 1: Subset disturbance datasets ####
         
         # Import consolidated cutblocks that intersect/predate study fire buffer
-        cc_sub <- sf::st_filter(cutblock_polygons, sf_aoi) %>% 
-          dplyr::filter(cc_harvest_start_year < study_fire_year) %>%
+        cc_sub <- sf::st_filter(cutblock_polygons, study_fire) %>% 
+          dplyr::filter(cc_harvest_start_year < study_fire$fire_year) %>%
           # Select variables of interest
           dplyr::select(cc_harvest_start_year, cc_harvest_end_year)
         
         # Import historical fires that intersect/predate study fire buffer
-        hf_sub <- sf::st_filter(historical_fire_polygons, sf_aoi) %>% 
-          dplyr::filter(hf_fire_year < study_fire_year) %>%
+        hf_sub <- sf::st_filter(historical_fire_polygons, study_fire) %>% 
+          dplyr::filter(hf_fire_year < study_fire$fire_year) %>%
           # Select variables of interest
           dplyr::select(hf_fire_year)
         
         # Import RESULTS openings/plantations for study fire
-        res_sub <- dplyr::filter(results_polygons, fire_id == study_fire_id) %>%
+        res_sub <- results_polygons %>% 
+          dplyr::filter(fire_id == study_fire$fire_id) %>%
           # Select variables of interest
           dplyr::select(
             res_harvest_start_year, res_harvest_end_year, res_fire_year,
@@ -61,13 +58,13 @@ prep_forestry_disturbance_rasters <- function(
           dplyr::mutate(
             dplyr::across(
               dplyr::ends_with("_year"),
-              ~ dplyr::if_else(.x < study_fire_year, .x, NA_real_)
+              ~ dplyr::if_else(.x < study_fire$fire_year, .x, NA_real_)
             )
           ) %>% 
           # Retain rows with disturbances
           dplyr::filter(!dplyr::if_all(dplyr::ends_with("_year"), is.na))
         
-        # ------------------------------------------------------------------ #
+        # -------------------------------------------------------------------- #
         # Step 2: Convert harvested, burned, and planted areas to raster ####
         
         ## 2.1 Rasterize most recent harvest year ####
@@ -100,7 +97,7 @@ prep_forestry_disturbance_rasters <- function(
             touches = TRUE
           )
         }
-      
+        
         ## 2.2 Rasterize most recent burn year ####
         
         # Get burned polygons
@@ -112,7 +109,7 @@ prep_forestry_disturbance_rasters <- function(
         if (nrow(burned_polygons) == 0) {
           # Create empty raster 
           burned_raster <- terra::subst(template_raster, 1, NA)
-        # If burned polygons are present in study area  
+          # If burned polygons are present in study area  
         } else {
           # Create raster of most recent burn year
           burned_raster <- terra::rasterize(
@@ -133,7 +130,7 @@ prep_forestry_disturbance_rasters <- function(
         if (nrow(planted_polygons) == 0) {
           # Create empty raster 
           planted_raster <- terra::subst(template_raster, 1, NA)
-        # If planted polygons are present in study area  
+          # If planted polygons are present in study area  
         } else {
           # Create raster of most recent planting year
           planted_raster <- terra::rasterize(
@@ -182,7 +179,7 @@ prep_forestry_disturbance_rasters <- function(
         # Add raster attribute table
         levels(planted_spp_raster) <- spp_rat
         
-        # ------------------------------------------------------------------ #
+        # -------------------------------------------------------------------- #
         # Step 3: Update harvested and planted areas ####
         
         # Update harvest where a plantation or fire follows
@@ -218,7 +215,7 @@ prep_forestry_disturbance_rasters <- function(
         )
         names(updated_planted_spp_raster) <- "res_planted_spp"
         
-        # ------------------------------------------------------------------ #
+        # -------------------------------------------------------------------- #
         # Step 4: Compute distance to managed/planted/harvested areas ####
         
         # Helper function: test if raster is empty (all NA values)
@@ -280,7 +277,7 @@ prep_forestry_disturbance_rasters <- function(
         # Rename layer
         names(harvested_distance) <- "harvested_distance"
         
-        # ------------------------------------------------------------------ #
+        # -------------------------------------------------------------------- #
         # Step 5: Compute proportion of managed forests in landscape
         
         # Create managed forest presence(1)/absence(0) raster
@@ -332,12 +329,12 @@ prep_forestry_disturbance_rasters <- function(
           pct_managed_raster
         )  %>% 
           # Mask to study fire area
-          terra::crop(y = v_aoi, mask = TRUE)
+          terra::crop(y = terra::vect(study_fire), mask = TRUE)
         
         # File path for writing raster to file
         raster_file_path <- fs::path(
           disturbance_cache,
-          paste0(study_fire_id, ".tif")
+          paste0(study_fire$fire_id, ".tif")
         )
         
         # Write forestry disturbance years to file  
@@ -350,9 +347,10 @@ prep_forestry_disturbance_rasters <- function(
         
         # Return tbl of file path
         tibble::tibble(
-          fire_id = study_fire_id,
+          fire_id = study_fire$fire_id,
           raster_file_path = raster_file_path
         )
+        
       }
     ) %>%
     # Combine
