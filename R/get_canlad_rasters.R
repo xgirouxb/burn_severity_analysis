@@ -111,7 +111,9 @@ get_canlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
           raster_file_path = raster_file_path
         )
       }
-    )
+    ) %>% 
+    # Convert list to tibble
+    purrr::list_rbind()
   
   # Return list of CanLaD disturbance raster file names
   return(canlad_disturbance_paths)
@@ -215,7 +217,9 @@ get_precanlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
           raster_file_path = raster_file_path
         )
       }
-    )
+    ) %>% 
+    # Convert list to tibble
+    purrr::list_rbind()
   
   # Return list of pre-CanLaD disturbance raster file names
   return(precanlad_disturbance_paths)
