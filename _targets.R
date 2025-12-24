@@ -187,10 +187,10 @@ list(
       vri_species_key
     )
   ),
-  # Prepare forest management rasters
+  # Prepare forestry disturbance rasters
   tar_target(
-    name = forest_management_rasters,
-    command = prep_forest_management_rasters(
+    name = forestry_disturbance_rasters,
+    command = prep_forestry_disturbance_rasters(
       study_fire_sampling_polygons,
       cutblock_polygons,
       historical_fire_polygons,
