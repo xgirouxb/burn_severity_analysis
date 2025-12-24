@@ -14,6 +14,12 @@ url_nbac_archive <- "https://cwfis.cfs.nrcan.gc.ca/downloads/nbac/"
 # NRCAN Digital Surface Model cloud optimized GeoTIFF 
 # Metadata available at: https://app.geo.ca/en-ca/map-browser/record/18752265-bda3-498c-a4ba-9dfe68cb98da
 url_nrcan_elevation <- "https://canelevation-dem.s3.ca-central-1.amazonaws.com/mrdem-30/mrdem-30-dsm.tif"
+
+# ---------------------------------------------------------------------------- #
+# Erni et al. 2019 Forestry Regime Type polygons
+# Methodology available at: https://doi.org/10.1139/cjfr-2019-0191
+url_frt_firezones <- "https://zenodo.org/records/4458156/files/FRT.zip"
+
 # ---------------------------------------------------------------------------- #
 # NRCAN Canadian Vegetation Zones (CVZ) polygons
 # Metadata available at: https://open.canada.ca/data/en/dataset/22b0166b-9db3-46b7-9baf-6584a3acc7b1
