@@ -26,7 +26,7 @@ url_frt_firezones <- "https://zenodo.org/records/4458156/files/FRT.zip"
 url_nrcan_vegetation_zones <- "https://ftp.maps.canada.ca/pub/nrcan_rncan/Ecology_Ecologie/vegetation_zones_of_canada_dwld/vegetation_zones_of_canada_2020_shp.zip"
 
 # ---------------------------------------------------------------------------- #
-# British Columbia - Biogeoclimatic Zones
+# British Columbia - Biogeoclimatic Ecological Classification polygons
 # Metadata available at: https://catalogue.data.gov.bc.ca/dataset/bec-map
 # Dataset UUID can be found using bcdata::bcdc_search("bec-map")
 uuid_bc_beogeoclimatic_zones <- "f358a53b-ffde-4830-a325-a5a03ff672c3"
