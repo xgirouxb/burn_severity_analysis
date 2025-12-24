@@ -65,6 +65,11 @@ list(
     name = biogeoclimatic_zone_polygons,
     command = get_biogeoclimatic_zone_polygons(study_fire_sampling_polygons)
   ),
+  # Import Fire Regime Types polygons
+  tar_target(
+    name = firezone_polygons,
+    command = get_firezone_polygons(study_fire_sampling_polygons)
+  ),
   # Import topography metric rasters
   tar_target(
     name = topography_rasters,
