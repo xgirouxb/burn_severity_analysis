@@ -205,7 +205,8 @@ list(
       burn_sample_points,
       cutblock_polygons,
       historical_fire_polygons,
-      results_polygons
+      results_polygons,
+      forestry_disturbance_rasters
     )
   ),
   # Sample forest variables: vegetation, land cover, and harvest/fire
