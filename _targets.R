@@ -149,15 +149,7 @@ list(
       study_fire_sampling_polygons
     )
   ),
-  # Import topographic and biogeo variables
-  tar_target(
-    name = topo_geo_tbl,
-    command = get_topo_geo_tbl(
-      path_fire_data,
-      burn_sample_points
-    )
-  ),
-  
+
   # -------------------------------------------------------------------------- #
   # Prepare input data sets for modelling
 
