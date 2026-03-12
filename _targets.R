@@ -203,10 +203,15 @@ list(
       land_cover_class_tbl,
       cutblock_polygons,
       historical_fire_polygons,
+      results_polygons,
       canlad_disturbance_rasters,
       precanlad_disturbance_rasters,
-      bc_results_tbl,
-      topo_geo_tbl
+      forestry_disturbance_rasters,
+      ccfm_tenure_rasters,
+      topography_rasters,
+      vegetation_zone_polygons,
+      biogeoclimatic_zone_polygons,
+      firezone_polygons
     )
   ),
   # Reclassify/impute VRI variables
