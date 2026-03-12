@@ -42,7 +42,7 @@ list(
     name = study_fire_polygons,
     command = get_study_fire_polygons(study_area, study_years)
   ),
-  # Define sampling area for study fires (include 1km and skips/refugia)
+  # Define sampling area for study fires (include 1km buffer and skips/refugia)
   tar_target(
     name = study_fire_sampling_polygons,
     command = sf::st_buffer(delete_holes(study_fire_polygons), 1000)
@@ -54,7 +54,7 @@ list(
       path_fire_data,
       study_fire_sampling_polygons
     )
-  ),
+  ), 
   # Import NRCAN Canada Vegetation Zones polygons
   tar_target(
     name = vegetation_zone_polygons,
@@ -138,7 +138,7 @@ list(
     name = land_cover_class_tbl,
     command = get_land_cover_class_tbl(
       burn_sample_points,
-      # Supply vector of radii within which to evaluate land cover proportions
+      # Supply vector of neighbourhood radii to compute land cover proportions
       neighbourhood_radius = c(100, 500, 1000)
     )
   ),
