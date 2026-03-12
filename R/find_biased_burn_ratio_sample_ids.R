@@ -15,10 +15,11 @@ find_biased_burn_ratio_sample_ids <- function(
     sf::st_join(cutblock_polygons, left = FALSE) %>% 
     # Filter within 1-year window before and after fire
     dplyr::filter(
-      # Harvest starts before end of window, AND...
+      # Harvest starts before end of window, AND
       cc_harvest_start_year <= (fire_year + 1) &
-      # ... ends (or starts if end is NA) after start of window
-      dplyr::coalesce(cc_harvest_end_year, cc_harvest_start_year) >= (fire_year - 1)
+        # Ends (or starts if end is NA) after start of window
+        dplyr::coalesce(cc_harvest_end_year, cc_harvest_start_year) >=
+          (fire_year - 1)
     ) %>%
     # Get vector of ids
     dplyr::pull(id)
@@ -40,7 +41,7 @@ find_biased_burn_ratio_sample_ids <- function(
   
   # -------------------------------------------------------------------------- #
   # Step 3: BC RESULTS harvest and fire polygon data ####
-  
+ 
   # Identify RESULTS harvest/fires in 1-year window before and after study fire
   res_harvest_fire_disturbed_sample_ids <- burn_sample_points %>% 
     # Nest samples by fire id
@@ -74,9 +75,9 @@ find_biased_burn_ratio_sample_ids <- function(
       res_harvest_start_year <= (fire_year + 1) &
         # ... ends after start of window
         res_harvest_end_year >= (fire_year - 1) |
-        # OR first fire in 1-year window
+        # OR first fire precedes or follows study fire year
         res_fire1_year == (fire_year - 1) | res_fire1_year == (fire_year + 1) |
-        # OR second fire 1-year window
+        # OR second fire precedes or follows study fire year
         res_fire2_year == (fire_year - 1) | res_fire2_year == (fire_year + 1)
     ) %>%
     # Get vector of ids
@@ -110,12 +111,10 @@ find_biased_burn_ratio_sample_ids <- function(
     tidyr::unnest(cols = c(forestry_disturbance_samples)) %>% 
     # Filter harvest or planting within 1-year window before and after study fire
     dplyr::filter(
-      # Harvest in 1-year window
-      harvest_year == (fire_year - 1) |
-        harvest_year == (fire_year + 1) |
+      # Harvest in 1-year window, OR
+      abs(harvest_year - fire_year) <= 1 |
         # Planting in 1-year window
-        res_planting_year == (fire_year - 1) |
-        res_planting_year == (fire_year + 1)
+        abs(res_planting_year - fire_year) <= 1
     ) %>% 
     # Get vector of ids
     dplyr::pull(id)
