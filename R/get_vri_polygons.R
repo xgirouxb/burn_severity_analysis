@@ -49,7 +49,7 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
         
         # Sanity check
         if (length(messy_gdb_name) > 1) { 
-          stop("> 1 matching gdb matches `vri_lyr_name`.") 
+          stop("> 1 gdb matches `vri_lyr_name`.") 
         }
         
         # Clean gdb naming scheme
@@ -67,8 +67,10 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
       }
       
       # Query cached VRI gdb for polygons in sample area
-      sf_poly_year <- dplyr::group_split(sf_aoi, fire_id) %>% 
-        # Map across each fire
+      sf_poly_year <- sf_aoi %>%
+        dplyr::filter(fire_year == study_year) %>% 
+        dplyr::group_split(fire_id) %>% 
+        # Map across each fire in study year
         purrr::map(
           function(study_fire) {
             sf::st_read(
