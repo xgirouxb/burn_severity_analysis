@@ -7,14 +7,14 @@ AD,Broadleaf,Poplar,No,No,Southern cottonwood,Populus,deltoides,,,Populus deltoi
 AT,Broadleaf,Poplar,Yes,Yes,Aspen,Populus,tremuloides,,,Populus tremuloides
 AX,Broadleaf,Poplar,Yes,Yes,Hybrid poplars,Populus,,,,Populus x spp.
 B,Coniferous,Fir,Yes,Yes,True fir ,Abies,,,,Abies spp.
-BA,Coniferous,Fir,Yes,Yes,Amabalis fir,Abies,amabalis,,,Abies amabalis
+BA,Coniferous,Fir,Yes,Yes,Amabilis fir,Abies,amabilis,,,Abies amabilis
 BB,Coniferous,Fir,No,No,Balsam fir,Abies,balsamea,,,Abies balsamea
 BC,Coniferous,Fir,No,No,White fir,Abies ,concolor,,,Abies concolor
 BG,Coniferous,Fir,Yes,Yes,Grand fir,Abies,grandis,,,Abies grandis
 BI,Coniferous,Fir,Yes,Yes,Subalpine fir,Abies,lasiocarpa,,,Abies lasiocarpa
 BL,Coniferous,Fir,Yes,Yes,Alpine fir,Abies,lasiocarpa,,,Abies lasiocarpa
 BM,Coniferous,Fir,No,No,Shasta red fir,Abies,magnifica,,shastensis,Abies magnifica var. shastensis
-BP,Coniferous,Fir,No,No,Noble fire,Abies,procera,,,Abies procera
+BP,Coniferous,Fir,No,No,Noble fir,Abies,procera,,,Abies procera
 C,Coniferous,Cedar,Yes,Yes,Cedar,Thuja ,,,,Thuja spp.
 CW,Coniferous,Cedar,Yes,Yes,Western red cedar,Thuja ,plicata,,,Thuja plicata
 D,Broadleaf,Alder,Yes,Yes,Alder,Alnus,,,,Alnus spp.
