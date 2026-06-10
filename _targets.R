@@ -2,6 +2,10 @@
 library(targets)
 library(tarchetypes)
 
+# Load environmental variables (in .Renviron file) for Google APIs
+GOOGLE_ACCOUNT_EMAIL <- Sys.getenv("GOOGLE_ACCOUNT_EMAIL")
+EARTH_ENGINE_PROJECT_ID <- Sys.getenv("EARTH_ENGINE_PROJECT_ID")
+
 # Set target options
 tar_option_set(
   # Packages that your targets need for their tasks.

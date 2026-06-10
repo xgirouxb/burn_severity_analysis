@@ -3,7 +3,7 @@
 .Rhistory
 .RData
 .Ruserdata
-.Rprofile
+.Renviron
 
 # Python cache files
 __pycache__/
@@ -30,9 +30,6 @@ renv/staging/
 
 # {targets} project files
 _targets/
-
-# Credentials
-secrets/
 
 # Recycle bin
 recycle_bin/
