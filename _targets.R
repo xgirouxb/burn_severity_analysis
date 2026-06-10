@@ -6,6 +6,9 @@ library(tarchetypes)
 GOOGLE_ACCOUNT_EMAIL <- Sys.getenv("GOOGLE_ACCOUNT_EMAIL")
 EARTH_ENGINE_PROJECT_ID <- Sys.getenv("EARTH_ENGINE_PROJECT_ID")
 
+# Refresh if OAuth token is stale to avoid interactive stall of pipeline
+googledrive::drive_auth(email = GOOGLE_ACCOUNT_EMAIL)
+
 # Set target options
 tar_option_set(
   # Packages that your targets need for their tasks.
