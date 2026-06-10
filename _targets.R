@@ -30,7 +30,7 @@ tar_source()
 list(
   
   # -------------------------------------------------------------------------- #
-  # Import study area fires, samples for pipeline, and input data sets
+  # Define study area fires and sampling points for analysis
   
   # Define study area as BC admin boundaries
   tar_target(
@@ -45,7 +45,7 @@ list(
   # Define sampling area for study fires (include 1km buffer and skips/refugia)
   tar_target(
     name = study_fire_sampling_polygons,
-    command = sf::st_buffer(delete_holes(study_fire_polygons), 1000)
+    command = get_study_fire_sampling_polygons(study_fire_polygons)
   ),
   # Import burn sample points from raw BC fire dataset (MGH)
   tar_target(

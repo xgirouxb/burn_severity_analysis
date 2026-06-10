@@ -2,4 +2,4 @@
 study_proj <- "EPSG:3005"
 
 # Study years
-study_years <- c(2017, 2018, 2021)
+study_years <- c(2017, 2018, 2021, 2023)
