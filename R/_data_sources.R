@@ -48,10 +48,6 @@ url_precanlad_1965_1984 <- "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_F
 url_canlad_1985_2024 <- "https://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canlad_including_insect_defoliation/v1/Disturbances_Time_Series/"
 
 # ---------------------------------------------------------------------------- #
-# Matt Heathcoat's raw BC burn severity dataset 
-path_fire_data <- "data/raw_burn_data/BCfiresDF.csv"
-
-# ---------------------------------------------------------------------------- #
 # VRI - Historical Vegetation Resource Inventory (2002 - 2023)
 # Metadata available at: https://catalogue.data.gov.bc.ca/dataset/vri-historical-vegetation-resource-inventory-2002-2023-
 url_vri_archive <- "https://pub.data.gov.bc.ca/datasets/02dba161-fdb7-48ae-a4bb-bd6ef017c36d/"

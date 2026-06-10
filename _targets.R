@@ -47,11 +47,11 @@ list(
     name = study_fire_sampling_polygons,
     command = get_study_fire_sampling_polygons(study_fire_polygons)
   ),
-  # Import burn sample points from raw BC fire dataset (MGH)
+  # Define study fire sampling points
   tar_target(
-    name = burn_sample_points,
-    command = get_burn_sample_points(
-      path_fire_data,
+    name = study_sampling_points,
+    command = define_study_sampling_points(
+      study_fire_polygons,
       study_fire_sampling_polygons
     )
   ), 
