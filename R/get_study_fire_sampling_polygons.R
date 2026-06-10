@@ -12,14 +12,17 @@ get_study_fire_sampling_polygons <- function(study_fire_polygons){
         # Compute the required buffer distance to double the polygon area
         dbl_buffer <- find_buffer_distance(study_fire)
         
-        # Apply buffer to double polygon area
-        buffered_fire_polygon <- sf::st_buffer(study_fire, dist = dbl_buffer)
-        
         # Delete holes 
-        buffered_filled_fire_polygon <- delete_holes(study_fire)
+        filled_fire_polygon <- delete_holes(study_fire)
+        
+        # Apply buffer to double polygon area
+        buffered_fire_polygon <- sf::st_buffer(
+          filled_fire_polygon,
+          dist = dbl_buffer
+        )
         
         # Return
-        return(buffered_filled_fire_polygon)
+        return(buffered_fire_polygon)
       }
     ) %>% 
     # Combine
