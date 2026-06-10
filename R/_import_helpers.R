@@ -156,3 +156,55 @@ get_tif_from_url <- function(
   # Return path to file in temp directory or supplied output directory 
   return(dest_path)
 }
+
+#' Monitor the status of Earth Engine batch tasks
+#'
+#' @param ee_task_id A vector containing Earth Engine API task IDs.
+#' @param wait_time A numeric value specifying the wait time in minutes between
+#'                  API task status checks. Default is 5.
+#'
+#' @return A tibble with updated `ee_task_status` values once all monitored tasks reach a terminal state.
+monitor_gee_tasks <- function(ee_task_id, check_interval_minutes = 52) {
+  
+  # Import python earthengine bindings
+  ee <- reticulate::import("ee")
+  
+  # Make task table
+  ee_task_tbl <- tibble::tibble(
+    ee_task_id = ee_task_id,
+    ee_task_status = "NEW"
+  )
+  
+  # Non-active status
+  non_active <- c("COMPLETED", "FAILED", "CANCELLED", "CANCELED")
+  
+  # Loop while any 'ee_task_status' is still active
+  while (!all(ee_task_tbl$ee_task_status %in% non_active)) {
+    
+    # Update status for all tasks at once
+    ee_task_tbl$ee_task_status <- purrr::map_chr(
+      ee_task_tbl$ee_task_id, 
+      function(task_id) {
+        status <- ee$data$getTaskStatus(task_id)[[1]]$state
+        # Fallback in case of temporary API disconnects
+        if (is.null(status)) "UNKNOWN" else status
+      }
+    )
+    
+    # If all tasks are inactive, exit while loop
+    if (all(ee_task_tbl$ee_task_status %in% non_active)) {
+      break
+    }
+    
+    # Else wait supplied interval and check again
+    n_active_ids <- ee_task_tbl %>% 
+      dplyr::filter(!(ee_task_status %in% non_active)) %>% 
+      nrow()
+    
+    cat(n_active_ids, "active Earth Engine API tasks remain, waiting ", check_interval_minutes, " minutes... \n")
+    Sys.sleep(check_interval_minutes * 60)
+  }
+  
+  # Return table of task ids with corresponding status
+  return(ee_task_tbl)
+}
