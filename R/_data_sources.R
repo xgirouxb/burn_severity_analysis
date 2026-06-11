@@ -16,6 +16,11 @@ url_nbac_archive <- "https://cwfis.cfs.nrcan.gc.ca/downloads/nbac/"
 gee_assetid_study_fire_sampling_polygons <- "projects/ee-bc-burn-severity/assets/study_fire_sampling_polygons"
 
 # ---------------------------------------------------------------------------- #
+# Canadian Fire Spread Dataset (CFSDS) on the Open Science Framework repository
+# Metadata available at: https://doi.org/10.17605/OSF.IO/F48RY
+guid_cfsds_fire_weather_repository <- "f48ry"
+
+# ---------------------------------------------------------------------------- #
 # NRCAN Digital Surface Model cloud optimized GeoTIFF 
 # Metadata available at: https://app.geo.ca/en-ca/map-browser/record/18752265-bda3-498c-a4ba-9dfe68cb98da
 url_nrcan_elevation <- "https://canelevation-dem.s3.ca-central-1.amazonaws.com/mrdem-30/mrdem-30-dsm.tif"

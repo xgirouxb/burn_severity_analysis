@@ -71,6 +71,18 @@ list(
     name = burn_severity_rasters,
     command = get_burn_severity_rasters(study_fire_sampling_polygons)
   ),
+  
+  # -------------------------------------------------------------------------- #
+  # Top-down fire weather covariates 
+  
+  # Import and rasterize fire weather points data from the Canadian Fire Spread
+  # Dataset (CFSDS) repository on OSF
+  tar_target(
+    name = fire_weather_rasters,
+    command = get_fire_weather_rasters(study_fire_sampling_polygons)
+  ),
+  
+  
   # Import NRCAN Canada Vegetation Zone polygons
   tar_target(
     name = vegetation_zone_polygons,
