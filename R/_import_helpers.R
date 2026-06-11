@@ -164,7 +164,7 @@ get_tif_from_url <- function(
 #'                  API task status checks. Default is 5.
 #'
 #' @return A tibble with updated `ee_task_status` values once all monitored tasks reach a terminal state.
-monitor_gee_tasks <- function(ee_task_id, check_interval_minutes = 52) {
+monitor_gee_tasks <- function(ee_task_id, check_interval_minutes = 2) {
   
   # Import python earthengine bindings
   ee <- reticulate::import("ee")

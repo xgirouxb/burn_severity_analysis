@@ -11,6 +11,11 @@ url_statcan_admin_bounds <- "https://www12.statcan.gc.ca/census-recensement/2021
 url_nbac_archive <- "https://cwfis.cfs.nrcan.gc.ca/downloads/nbac/"
 
 # ---------------------------------------------------------------------------- #
+# Study fire sampling polygons - GEE asset
+# Copy of local `study_fire_sampling_polygon` target sf object uploaded to GEE assets 
+gee_assetid_study_fire_sampling_polygons <- "projects/ee-bc-burn-severity/assets/study_fire_sampling_polygons"
+
+# ---------------------------------------------------------------------------- #
 # NRCAN Digital Surface Model cloud optimized GeoTIFF 
 # Metadata available at: https://app.geo.ca/en-ca/map-browser/record/18752265-bda3-498c-a4ba-9dfe68cb98da
 url_nrcan_elevation <- "https://canelevation-dem.s3.ca-central-1.amazonaws.com/mrdem-30/mrdem-30-dsm.tif"

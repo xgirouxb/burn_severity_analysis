@@ -62,7 +62,16 @@ list(
       study_fire_sampling_polygons
     )
   ), 
-  # Import NRCAN Canada Vegetation Zones polygons
+  
+  # -------------------------------------------------------------------------- #
+  # Prepare response variable - burn severity 
+  
+  #  Import Relativized Burn Ratio images computed via Google Earth Engine API
+  tar_target(
+    name = burn_severity_rasters,
+    command = get_burn_severity_rasters(study_fire_sampling_polygons)
+  ),
+  # Import NRCAN Canada Vegetation Zone polygons
   tar_target(
     name = vegetation_zone_polygons,
     command = get_vegetation_zone_polygons(study_fire_sampling_polygons)
