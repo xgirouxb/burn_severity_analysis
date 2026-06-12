@@ -75,13 +75,10 @@ get_fire_weather_rasters <- function(
     purrr::map(
       function(study_fire) {
         
-        # Use NRCAN projection for native CFSDS dataset operations
-        nrcan_proj <- 'EPSG:3979'
-        
         # -------------------------------------------------------------------- #
         ## Step 3.1: Read the massive CSVs with {arrow} to save memory ####
-        
-        # Read csv 
+
+        # Read fire weather points 
         fire_weather_sf <- arrow::open_csv_dataset(
           # Provide path to csv for corresponding study year
           sources = csv_tbl %>% 
@@ -94,33 +91,39 @@ get_fire_weather_rasters <- function(
           # Collect fire weather points for study fire
           dplyr::filter(ID == study_fire$fire_id) %>%
           dplyr::collect() %>% 
+          # Remove duplicates, keep row where sprdistm has a value
+          dplyr::group_by(lon, lat) %>%
+          dplyr::slice_max(order_by = sprdistm, n = 1, with_ties = FALSE) %>%
+          dplyr::ungroup() %>%
+          dplyr::distinct(.keep_all = TRUE) %>% 
           # Make a unique row ID and clean up names
           dplyr::mutate(id = dplyr::row_number()) %>% 
           dplyr::select(id, fire_id = ID, dob = DOB, dplyr::everything()) %>% 
-          # Cast to sf
+          # Cast to sf and project
           sf::st_as_sf(coords = c("lon", "lat"), crs = sf::st_crs(4326)) %>% 
-          sf::st_transform(nrcan_proj)
+          sf::st_transform(study_proj)
+ 
+        # Cast to terra vect points
+        fire_weather_pts <- terra::vect(fire_weather_sf)
         
         # -------------------------------------------------------------------- #
-        ## Step 3.2: Rasterize the fire weather points in native projection ####
+        ## Step 3.2: Rasterize the fire weather points ####
         
-        # Reproject study fire to CFSDS native projection
-        study_fire_lambert <- study_fire %>% 
-          sf::st_transform(nrcan_proj) %>% 
-          terra::vect()
+        # Cast fire polygon to terra vect
+        study_fire_poly <- terra::vect(study_fire)
         
         # Create template raster at 30-m resolution 
         template_raster <- terra::rast(
-          x = study_fire_lambert,
+          x = study_fire_poly,
           resolution = 90,
           vals = 1
         ) %>% 
           # Mask to buffered study fire area
-          terra::crop(y = study_fire_lambert, mask = TRUE)
+          terra::crop(y = study_fire_poly, mask = TRUE)
         
         # Rasterize unique IDs of fire weather points 
         r_ids <- terra::rasterize(
-          x = terra::vect(fire_weather_sf),
+          x = fire_weather_pts,
           y = template_raster,
           field = "id" 
         ) %>% 
@@ -128,8 +131,9 @@ get_fire_weather_rasters <- function(
           terra::cover(x = ., y = terra::distance(x = ., values = TRUE))
         
         # List of variables to add as raster bands
-        var_list <- sf::st_drop_geometry(fire_weather_sf) %>% 
-          dplyr::select(-id, -fire_id, -year) %>% 
+        var_list <- fire_weather_sf %>%
+          sf::st_drop_geometry() %>%
+          dplyr::select(-id, -fire_id, -year) %>%
           names()
         
         # Value lookup table
@@ -137,31 +141,34 @@ get_fire_weather_rasters <- function(
           sf::st_drop_geometry() %>%
           dplyr::select(id, dplyr::all_of(var_list))
         
-        # Map over each variable and add it as a band to the raster
-        fire_weather_bands <- purrr::map(
-          var_list,
-          function(var) {
-            # Substitute ID values for their corresponding variable values
-            r <- terra::subst(x = r_ids, from = val_tbl$id, to = val_tbl[[var]]) 
-            
-            # Assign the attribute name
-            names(r) <- var
-            
-            # Return one-banded raster
-            return(r)
-          }
+        # Cast value lookup table to matrix
+        val_mat <- as.matrix(val_tbl[, var_list])
+        
+        # Extract vector of rasterized ids
+        id_vals <- terra::values(r_ids, mat = FALSE)
+        
+        # Matching vector of corresponding row indices
+        row_idx <- base::match(id_vals, val_tbl$id)
+        
+        # Populate matrix using the values in the lookup matrix
+        out_mat <- val_mat[row_idx, , drop = FALSE]
+        
+        # Create an empty raster with correct number of bands
+        fire_weather_raster <- terra::rast(
+          template_raster,
+          nlyrs = length(var_list)
         )
         
-        # Combine bands into one raster, project, and crop
-        fire_weather_raster <- terra::rast(fire_weather_bands) %>% 
-          # Reproject to study projection
-          terra::project(
-            y = study_proj,
-            method = "near",
-            res = 90
-          ) %>% 
-          # Mask to study fire area
-          terra::crop(y = terra::vect(study_fire), mask = TRUE)
+        # Fill all the cells in each band, rename bands
+        terra::values(fire_weather_raster) <- out_mat
+        names(fire_weather_raster) <- var_list
+        
+        # Mask to study fire sampling polygon
+        fire_weather_raster <- terra::crop(
+          fire_weather_raster,
+          study_fire_poly,
+          mask = TRUE
+        )
         
         # -------------------------------------------------------------------- #
         ## Step 3.3: Write fire weather rasters to local cache ####
