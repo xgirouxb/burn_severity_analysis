@@ -86,9 +86,9 @@ get_fire_weather_rasters <- function(
             dplyr::pull(csv_path),
           # Use custom arrow schema to avoid data type errors
           schema = arrow_schema,
-          skip = 1
+          skip = 1 # Skip header row (already encoded in schema)
         ) %>% 
-          # Collect fire weather points for study fire
+          # Pull current study fire's points from CFSDS
           dplyr::filter(ID == study_fire$fire_id) %>%
           dplyr::collect() %>% 
           # Remove duplicates, keep row where sprdistm has a value
@@ -96,14 +96,14 @@ get_fire_weather_rasters <- function(
           dplyr::slice_max(order_by = sprdistm, n = 1, with_ties = FALSE) %>%
           dplyr::ungroup() %>%
           dplyr::distinct(.keep_all = TRUE) %>% 
-          # Make a unique row ID and clean up names
+          # Make a unique row ID for rasterization lookup table (Section 3.2)
           dplyr::mutate(id = dplyr::row_number()) %>% 
-          dplyr::select(id, fire_id = ID, dob = DOB, dplyr::everything()) %>% 
-          # Cast to sf and project
+          # Clean up, cast to sf, project
+          dplyr::select(id, fire_id = ID, dob = DOB, dplyr::everything()) %>%
           sf::st_as_sf(coords = c("lon", "lat"), crs = sf::st_crs(4326)) %>% 
-          sf::st_transform(study_proj)
+          sf::st_transform(nrcan_proj)
  
-        # Cast to terra vect points
+        # Cast sf points to terra vect points
         fire_weather_pts <- terra::vect(fire_weather_sf)
         
         # -------------------------------------------------------------------- #
@@ -126,40 +126,56 @@ get_fire_weather_rasters <- function(
           x = fire_weather_pts,
           y = template_raster,
           field = "id" 
-        ) %>% 
-          # Fill in NA pixels with ID of nearest pixel
-          terra::cover(x = ., y = terra::distance(x = ., values = TRUE))
+        ) 
         
-        # List of variables to add as raster bands
+        # Fill in NA pixels with ID from the nearest pixel
+        r_ids <- terra::cover(
+          x = r_ids,
+          y = terra::distance(x = r_ids, values = TRUE)
+        )
+        
+        # List of fire weather variables to be rasterized
         var_list <- fire_weather_sf %>%
           sf::st_drop_geometry() %>%
           dplyr::select(-id, -fire_id, -year) %>%
           names()
         
-        # Value lookup table
+        # Build a lookup table of row ID → variable values
         val_tbl <- fire_weather_sf %>%
           sf::st_drop_geometry() %>%
           dplyr::select(id, dplyr::all_of(var_list))
         
-        # Cast value lookup table to matrix
+        # Cast value lookup table to matrix for speed
         val_mat <- as.matrix(val_tbl[, var_list])
         
-        # Extract vector of rasterized ids
+        # Extract vector of rasterized ids, one id per pixel
         id_vals <- terra::values(r_ids, mat = FALSE)
         
-        # Matching vector of corresponding row indices
+        # Matching each pixel's id to the corresponding row in val_mat
         row_idx <- base::match(id_vals, val_tbl$id)
         
-        # Populate matrix using the values in the lookup matrix
+        # Sanity check: all rasterized pixel IDs should match a row in the fire
+        #               weather lookup table — if not, rasterizing ids 
+        #               produced unexpected values.
+        if (anyNA(row_idx)) {
+          stop(
+            "⚠️ Fire weather raster contains pixel IDs with no match in the lookup table!\n",
+            "   fire_id: ", study_fire$fire_id, "\n",
+            "   Unmatched pixel IDs: ", paste(unique(id_vals[is.na(row_idx)]), collapse = ", ")
+          )
+        }
+
+        # Look up each pixel's weather values by row index — produces an 
+        # (n_pixels × n_vars) matrix in raster pixel order
         out_mat <- val_mat[row_idx, , drop = FALSE]
         
-        # Create an empty raster with correct number of bands
+        # Create an empty multi-band raster (one band per weather variable)
         fire_weather_raster <- terra::rast(
           template_raster,
           nlyrs = length(var_list)
         )
         
-        # Fill all the cells in each band, rename bands
+        # Populate raster bands from the output matrix and name them
         terra::values(fire_weather_raster) <- out_mat
         names(fire_weather_raster) <- var_list
         
