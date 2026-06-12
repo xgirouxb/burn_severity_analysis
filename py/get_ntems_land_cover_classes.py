@@ -1,5 +1,4 @@
 import ee
-ee.Initialize()
 
 # Helper: Add year property to each image
 def add_year_prop(img):
@@ -26,7 +25,7 @@ def lc_binary_bands(img):
     ])
 
 # Main sampling function
-def sample_lc_classes(
+def sample_ntems_lc_classes(
   sample_pts,
   forest_land_cover = ee.ImageCollection("projects/sat-io/open-datasets/CA_FOREST_LC_VLCE2"),
   radius_list=ee.List([1000])
@@ -115,11 +114,11 @@ def sample_lc_classes(
             t_area = ee.Number(lc_area.get('constant'))
 
             return ee.List([
-                [make_key('lc_prop_nonfuel_', radius), ee.Number(lc_area.get('nonfuel')).divide(t_area)],
-                [make_key('lc_prop_open_', radius), ee.Number(lc_area.get('open')).divide(t_area)],
-                [make_key('lc_prop_wetland_', radius), ee.Number(lc_area.get('wetland')).divide(t_area)],
-                [make_key('lc_prop_coniferous_', radius), ee.Number(lc_area.get('coniferous')).divide(t_area)],
-                [make_key('lc_prop_deciduous_', radius), ee.Number(lc_area.get('deciduous')).divide(t_area)],
+                [make_key('ntems_prop_nonfuel_', radius), ee.Number(lc_area.get('nonfuel')).divide(t_area)],
+                [make_key('ntems_prop_open_', radius), ee.Number(lc_area.get('open')).divide(t_area)],
+                [make_key('ntems_prop_wetland_', radius), ee.Number(lc_area.get('wetland')).divide(t_area)],
+                [make_key('ntems_prop_coniferous_', radius), ee.Number(lc_area.get('coniferous')).divide(t_area)],
+                [make_key('ntems_prop_deciduous_', radius), ee.Number(lc_area.get('deciduous')).divide(t_area)],
             ])
             
         # Map over list of radii, outputs list of lists of key-value pairs
@@ -129,7 +128,7 @@ def sample_lc_classes(
         key_value_list = key_value_lists.flatten().flatten()
         
         # Convert to dictionary, add landcover class property
-        key_value_dict = ee.Dictionary(key_value_list).set('lc_land_cover', lc_pt_str)
+        key_value_dict = ee.Dictionary(key_value_list).set('ntems_land_cover', lc_pt_str)
         
         return sample_pt.set(key_value_dict)
     
@@ -145,7 +144,7 @@ def sample_lc_classes(
     # Export to Google Drive
     task = ee.batch.Export.table.toDrive(
         collection=sampled_lc,
-        description='land_cover_proportion_samples',
+        description='ntems_land_cover_proportion_samples',
         folder='ee_bc_burn_severity',
         fileFormat='CSV',
         selectors=property_names
