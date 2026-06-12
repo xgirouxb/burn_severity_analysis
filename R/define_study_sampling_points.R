@@ -34,12 +34,15 @@ define_study_sampling_points <- function(
           # Stop sampling once max number of samples is reached
           n = unique(fire_polygon$max_samples)
         ) %>%
-          # Project and cast to sf, add fire_id
+          # Project and cast to sf, add fire_id and fire_year
           sf::st_set_crs(study_proj) %>% 
           sf::st_as_sf() %>%
-          dplyr::mutate(fire_id = unique(fire_polygon$fire_id)) %>% 
+          dplyr::mutate(
+            fire_id = unique(fire_polygon$fire_id),
+            fire_year = unique(fire_polygon$fire_year)
+          ) %>% 
           # Clean up, rename geometry column
-          dplyr::select(fire_id, geometry = geom) %>% 
+          dplyr::select(fire_id, fire_year, geometry = geom) %>% 
           # Classify the samples as burned (1) or not burned (0) based on 
           # their intersection with the NBAC polygon
           sf::st_join(y = burned_polygon) %>% 
