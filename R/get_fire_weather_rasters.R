@@ -112,7 +112,7 @@ get_fire_weather_rasters <- function(
         # Cast fire polygon to terra vect
         study_fire_poly <- terra::vect(study_fire)
         
-        # Create template raster at 30-m resolution 
+        # Create template raster at 90-m resolution 
         template_raster <- terra::rast(
           x = study_fire_poly,
           resolution = 90,
