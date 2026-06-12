@@ -2,7 +2,7 @@ get_topography_rasters <- function(study_fire_sampling_polygons) {
   
   # Define local cache directory for output rasters, create if it doesn't exist
   topo_cache <- fs::path("data/_cache/topographic_metrics")
-  if (!fs::dir_exists(topo_cache)) { fs::dir_create(topo_cache) }
+  fs::dir_create(topo_cache)
   
   # Connect to NRCAN Digital Surface Model COG
   topo_cog <- terra::rast(paste0("/vsicurl/", url_nrcan_elevation))
@@ -11,7 +11,7 @@ get_topography_rasters <- function(study_fire_sampling_polygons) {
   nrcan_proj <- terra::crs(topo_cog)
   
   # Create list of topography metrics raster file paths for each study fire
-  topography_paths <- study_fire_sampling_polygons %>% 
+  topography_raster_paths <- study_fire_sampling_polygons %>% 
     # Split by study fire
     dplyr::group_split(fire_id) %>% 
     # Extract digital surface model for each study fire and compute topo metrics
@@ -88,5 +88,5 @@ get_topography_rasters <- function(study_fire_sampling_polygons) {
     dplyr::bind_rows()
   
   # Return list of topography raster file paths
-  return(topography_paths)
+  return(topography_raster_paths)
 }
