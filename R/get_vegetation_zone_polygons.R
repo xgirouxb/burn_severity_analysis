@@ -1,9 +1,9 @@
-get_vegetation_zone_polygons <- function(study_fire_sampling_polygons) {
+get_vegetation_zone_polygons <- function(sampling_polygons) {
   
   # Get Canadian Vegetation Zone (CVZ) polygons that intersect study area
   vegetation_zone_polygons <- get_sf_from_source(
     sf_source = url_nrcan_vegetation_zones,
-    sf_aoi = study_fire_sampling_polygons
+    sf_aoi = sampling_polygons
   ) %>% 
     # Group by Level 1 vegetation zone
     dplyr::group_by(id_1) %>% 

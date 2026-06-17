@@ -1,4 +1,4 @@
-get_biogeoclimatic_zone_polygons <- function(study_fire_sampling_polygons) {
+get_biogeoclimatic_zone_polygons <- function(sampling_polygons) {
   
   # Get BC Biogeoclimatic Ecological Classification (BEC) polygons
   # that intersect study fires
@@ -6,7 +6,7 @@ get_biogeoclimatic_zone_polygons <- function(study_fire_sampling_polygons) {
     uuid_bc_beogeoclimatic_zones
   ) %>% 
     bcdata::collect() %>% 
-    sf::st_filter(study_fire_sampling_polygons) %>% 
+    sf::st_filter(sampling_polygons) %>% 
     # Dissolve into single MULTIPOLYGON for each BEC
     dplyr::group_by(ZONE_NAME) %>% 
     dplyr::summarise(

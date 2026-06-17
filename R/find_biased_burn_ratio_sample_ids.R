@@ -1,5 +1,5 @@
 find_biased_burn_ratio_sample_ids <- function(
-    burn_sample_points,
+    sampling_points,
     cutblock_polygons,
     historical_fire_polygons,
     results_polygons,
@@ -10,7 +10,7 @@ find_biased_burn_ratio_sample_ids <- function(
   # Step 1: Consolidated cutblocks harvest polygon data ####
   
   # Identify samples with cutblocks in 1 year window before and after fire
-  cc_disturbed_sample_ids <- burn_sample_points %>% 
+  cc_disturbed_sample_ids <- sampling_points %>% 
     # Join intersecting cutblock polygons
     sf::st_join(cutblock_polygons, left = FALSE) %>% 
     # Filter within 1-year window before and after fire
@@ -28,7 +28,7 @@ find_biased_burn_ratio_sample_ids <- function(
   # Step 2: BC historical fire polygon data ####
   
   # Identify samples with fires in 1-year window before and after study fire
- hf_disturbed_sample_ids <- burn_sample_points %>% 
+ hf_disturbed_sample_ids <- sampling_points %>% 
     # Join intersecting historical fire polygons
     sf::st_join(historical_fire_polygons, left = FALSE) %>%
     # Filter non-study fires within 1-year window before and after fire
@@ -43,7 +43,7 @@ find_biased_burn_ratio_sample_ids <- function(
   # Step 3: BC RESULTS harvest and fire polygon data ####
  
   # Identify RESULTS harvest/fires in 1-year window before and after study fire
-  res_harvest_fire_disturbed_sample_ids <- burn_sample_points %>% 
+  res_harvest_fire_disturbed_sample_ids <- sampling_points %>% 
     # Nest samples by fire id
     # (avoid sampling if point intersects mismatched overlapping fires)
     dplyr::group_split(fire_id) %>% 
@@ -90,7 +90,7 @@ find_biased_burn_ratio_sample_ids <- function(
   #       leads to edge errors, additional filtering with rasters is required       
   
   # Identify harvest/plantings in 1-year window before and after study fire
-  fd_harvest_planting_disturbed_sample_ids <- burn_sample_points %>% 
+  fd_harvest_planting_disturbed_sample_ids <- sampling_points %>% 
     # Nest by study fire and year
     dplyr::group_nest(fire_id, fire_year) %>% 
     # Join table of forest management raster file names

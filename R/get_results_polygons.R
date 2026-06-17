@@ -1,7 +1,7 @@
-get_results_openings_polygons <- function(study_fire_sampling_polygons) {
+get_results_openings_polygons <- function(sampling_polygons) {
   
   # Import BC RESULTS openings polygons that intersect study fires
-  results_openings_polygons <- study_fire_sampling_polygons %>%
+  results_openings_polygons <- sampling_polygons %>%
     # Add 10-km buffer for downstream neighbourhood variables
     sf::st_buffer(dist = 10000) %>% 
     # Nest by fire (to respect {bcdata} spatial query size limits)

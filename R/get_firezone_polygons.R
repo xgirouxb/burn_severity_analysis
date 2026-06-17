@@ -1,4 +1,4 @@
-get_firezone_polygons <- function(study_fire_sampling_polygons) {
+get_firezone_polygons <- function(sampling_polygons) {
   
   # Fire regime types (FRT) legend (see Figure 4, doi 10.1139/cjfr-2019-0191)
   # m : Mountains
@@ -28,7 +28,7 @@ get_firezone_polygons <- function(study_fire_sampling_polygons) {
   # Get Canada fire zone polygons that intersect study fires
   firezone_polygons <- get_sf_from_source(
     sf_source = url_frt_firezones,
-    sf_aoi = study_fire_sampling_polygons
+    sf_aoi = sampling_polygons
   ) %>% 
     # Join FRT names
     dplyr::left_join(frt_legend, by = c("Cluster" = "frt")) %>% 

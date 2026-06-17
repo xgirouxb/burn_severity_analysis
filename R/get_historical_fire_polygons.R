@@ -1,4 +1,4 @@
-get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
+get_historical_fire_polygons <- function(sampling_polygons) {
   
   # -------------------------------------------------------------------------- #
   # Step 1: Import and wrangle NBAC archive                                 ####
@@ -33,7 +33,7 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
     # Spatial inner join to filter historical fires that intersect study fires
     sf::st_join(
       # Add 10-km buffer for downstream neighbourhood variables
-      y = sf::st_buffer(study_fire_sampling_polygons, dist = 10000),
+      y = sf::st_buffer(sampling_polygons, dist = 10000),
       left = FALSE
     ) %>% 
     # Retain unique historical fires (some fires may intersect > 1 study fire)
@@ -65,7 +65,7 @@ get_historical_fire_polygons <- function(study_fire_sampling_polygons) {
     # Spatial inner join to filter historical fires that intersect study fires
     sf::st_join(
       # Add 10-km buffer for downstream neighbourhood variables
-      y = sf::st_buffer(study_fire_sampling_polygons, dist = 10000),
+      y = sf::st_buffer(sampling_polygons, dist = 10000),
       left = FALSE
     ) %>% 
     # Retain unique historical fires (some fires may intersect > 1 study fire)

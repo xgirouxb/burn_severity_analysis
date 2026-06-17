@@ -1,6 +1,4 @@
-get_ccfm_forest_tenure_rasters <- function(
-    study_fire_sampling_polygons
-){
+get_ccfm_forest_tenure_rasters <- function(sampling_polygons) {
   # Raster attribute table for Canadian Council of Forest Minister's tenure map
   tenure_rat <- data.frame(
     value = c(11, 12, 13, 20, 31, 32, 33, 40, 50, 100),
@@ -28,7 +26,7 @@ get_ccfm_forest_tenure_rasters <- function(
   if (!fs::dir_exists(tenure_cache)) { fs::dir_create(tenure_cache) }
   
   # Create list of CCFM forest tenure file paths for each study fire
-  ccfm_tenure_paths <- study_fire_sampling_polygons %>% 
+  ccfm_tenure_paths <- sampling_polygons %>% 
     # Split by study fire
     dplyr::group_split(fire_id) %>% 
     # Get tenure from 2017 or 2020 CCFM forest tenure maps
