@@ -1,10 +1,20 @@
-define_study_sampling_points <- function(
+define_sampling_points <- function(
     study_fire_polygons,
-    study_fire_sampling_polygons
+    sampling_polygons,
+    n_workers = NULL
 ) {
   
+  # Setup parallel processing if n_workers is supplied
+  if(!is.null(n_workers)) { 
+    future::plan(
+      strategy = "future::multisession",
+      workers = n_workers,
+      gc = TRUE
+    )
+  }
+  
   # Randomly generate sampling points within each study fire sampling polygon
-  study_sampling_points <- study_fire_sampling_polygons %>% 
+  study_sampling_points <- sampling_polygons %>% 
     # Stop sampling when there is approximately 1 sample per 8 ha 
     dplyr::mutate(
       area_ha = units::drop_units(units::set_units(sf::st_area(.), ha)),
@@ -13,7 +23,7 @@ define_study_sampling_points <- function(
     # Make list of fire sf polygons
     group_split(fire_id) %>% 
     # Map Sequential Sampling Inhibition algorithm 
-    purrr::map(
+    furrr::future_map(
       function(fire_polygon) {
         
         # Set random seed
@@ -50,13 +60,18 @@ define_study_sampling_points <- function(
         
         # Return sample points 
         return(sample_points)
-      }
+      },
+      # Pass seed to {future} to avoid complaints
+      .options = furrr::furrr_options(seed = TRUE)
     ) %>% 
     # Bind rows
     dplyr::bind_rows() %>% 
     # Add unique sample id
     dplyr::mutate(id = dplyr::row_number()) %>% 
     dplyr::relocate(id, .before = dplyr::everything())
+  
+  # Close parallel processing if n_workers is supplied
+  if(!is.null(n_workers)) { future::plan(strategy = "future::sequential") }
     
   # Return sampling points
   return(study_sampling_points)
