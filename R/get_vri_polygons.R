@@ -9,8 +9,7 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
       vri_year <- study_year + year_offset
       
       # Define cache directory for VRI archive, create if it doesn't exist
-      vri_cache <- fs::path("data/_cache/vri", vri_year)
-      if (!fs::dir_exists(vri_cache)) { fs::dir_create(vri_cache) }
+      vri_cache <- fs::dir_create(fs::path("data/_cache/vri", vri_year))
       
       # If VRI cache contains no gdb matching vri_lyr_name...
       if (!any(stringr::str_detect(fs::dir_ls(vri_cache), vri_lyr_name))) {
@@ -49,7 +48,7 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
         
         # Sanity check
         if (length(messy_gdb_name) > 1) { 
-          stop("> 1 gdb matches `vri_lyr_name`.") 
+          stop("⚠️ > 1 gdb matches `vri_lyr_name`.") 
         }
         
         # Clean gdb naming scheme
@@ -62,8 +61,8 @@ get_vri_polygons <- function(sf_aoi, year_offset = -1, vri_lyr_name) {
         file.rename(messy_gdb_name, clean_gdb_name)
         
         # Sanity check
-        if (!fs::dir_exists(clean_gdb_name)) { stop("Bad VRI gdb names.") }
-        if (fs::dir_exists(messy_gdb_name)) { stop("Bad VRI gdb names.") }
+        if (!fs::dir_exists(clean_gdb_name)) { stop("⚠️ Bad VRI gdb names.") }
+        if (fs::dir_exists(messy_gdb_name)) { stop("⚠️ Bad VRI gdb names.") }
       }
       
       # Query cached VRI gdb for polygons in sample area
