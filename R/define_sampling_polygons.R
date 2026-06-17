@@ -1,8 +1,8 @@
-get_study_fire_sampling_polygons <- function(study_fire_polygons){
+define_sampling_polygons <- function(study_fire_polygons){
   
   # Buffer fire polygons and fill in holes to allow sampling of unburned areas
   # in surrounding landscape and skips/refugia within the burn area
-  study_fire_sampling_polygons <- study_fire_polygons %>% 
+  sampling_polygons <- study_fire_polygons %>% 
     # Split into list of study fires
     dplyr::group_split(fire_id) %>% 
     # Double the area and fill in the holes of each fire polygon
@@ -29,5 +29,5 @@ get_study_fire_sampling_polygons <- function(study_fire_polygons){
     dplyr::bind_rows()
   
   # Return
-  return(study_fire_sampling_polygons)
+  return(sampling_polygons)
 }
