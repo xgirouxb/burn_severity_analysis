@@ -1,4 +1,4 @@
-get_burn_severity_rasters <- function(study_fire_sampling_polygons) {
+get_burn_severity_rasters <- function(sampling_polygons) {
   
   # -------------------------------------------------------------------------- #
   # Step 1: Prep environment and import modules                             ####
@@ -11,32 +11,32 @@ get_burn_severity_rasters <- function(study_fire_sampling_polygons) {
   get_rbr <- reticulate::import_from_path("get_rbr_img", "py")
   
   # Feature collection of study fire sampling polygons
-  ee_study_fire_sampling_polygons <- ee$FeatureCollection(gee_assetid_study_fire_sampling_polygons)
+  ee_sampling_polygons <- ee$FeatureCollection(gee_assetid_sampling_polygons)
   
   # Get list of fire_id's in ee asset
-  ee_fire_id_list <- ee_study_fire_sampling_polygons$aggregate_array('fire_id')$getInfo()
+  ee_fire_id_list <- ee_sampling_polygons$aggregate_array('fire_id')$getInfo()
   
-  # Get list of fire_id's in local `study_fire_sampling_polygons` target
-  fire_id_list <- unique(study_fire_sampling_polygons$fire_id)
+  # Get list of fire_id's in local `sampling_polygons` target
+  fire_id_list <- unique(sampling_polygons$fire_id)
   
-  # Sanity check: `study_fire_sampling_polygons` in GEE assets should have same 
+  # Sanity check: `sampling_polygons` in GEE assets should have same 
   #                fire_id's as those in local target.
   if (!identical(sort(ee_fire_id_list), sort(fire_id_list))) {
     # ...if it does not stop and print out warning
     stop(
-      "⚠️`study_fire_sampling_polygons` in GEE assets does not match local copy, upload latest version!",
+      "⚠️`sampling_polygons` in GEE assets does not match local copy, upload latest version!",
     )
   }
   
   # -------------------------------------------------------------------------- #
   # Step 2: Compute RBR images for each study fire sampling polygon         ####
   
-  # Launch task on EE for each fire, return table of fire_ids with 
+  # Launch task on EE for each fire, return table of fire_ids with ee task ids
   rbr_tasks <- purrr::map(
     fire_id_list,
     function(fire_id) {
       ee_task_id <- get_rbr$get_rbr_img(
-        fire_polygon = ee$Feature(ee_study_fire_sampling_polygons$filter(ee$Filter$eq('fire_id', fire_id))$first())
+        fire_polygon = ee$Feature(ee_sampling_polygons$filter(ee$Filter$eq('fire_id', fire_id))$first())
       )
       return(tibble::tibble(fire_id = fire_id, ee_task_id = ee_task_id$id))
     }
@@ -45,7 +45,7 @@ get_burn_severity_rasters <- function(study_fire_sampling_polygons) {
     dplyr::bind_rows()
   
   # -------------------------------------------------------------------------- #
-  # Step 3: Monitor task on Earth Engine server                             ####
+  # Step 3: Monitor tasks on Earth Engine server                             ####
   
   # Monitor tasks until all are inactive
   task_status <- monitor_gee_tasks(ee_task_id = rbr_tasks$ee_task_id)
@@ -111,7 +111,7 @@ get_burn_severity_rasters <- function(study_fire_sampling_polygons) {
     purrr::map(
       function(rbr_img) {
         googledrive::drive_download(
-          file = rbr_img$name,
+          file = googledrive::as_id(rbr_img$id),
           path = fs::path(rbr_cache, paste0(rbr_img$fire_id, ".tif")),
           overwrite = TRUE,
         )

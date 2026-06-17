@@ -13,7 +13,7 @@ url_nbac_archive <- "https://cwfis.cfs.nrcan.gc.ca/downloads/nbac/"
 # ---------------------------------------------------------------------------- #
 # Study fire sampling polygons - GEE asset
 # Copy of local `study_fire_sampling_polygon` target sf object uploaded to GEE assets 
-gee_assetid_study_fire_sampling_polygons <- "projects/ee-bc-burn-severity/assets/study_fire_sampling_polygons"
+gee_assetid_sampling_polygons <- "projects/ee-bc-burn-severity/assets/sampling_polygons"
 
 # ---------------------------------------------------------------------------- #
 # Canadian Fire Spread Dataset (CFSDS) on the Open Science Framework repository
