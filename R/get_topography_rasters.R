@@ -1,22 +1,29 @@
-get_topography_rasters <- function(study_fire_sampling_polygons) {
+get_topography_rasters <- function(sampling_polygons, n_workers = NULL) {
   
   # Define local cache directory for output rasters, create if it doesn't exist
-  topo_cache <- fs::path("data/_cache/topographic_metrics")
-  fs::dir_create(topo_cache)
+  topo_cache <- fs::dir_create("data/_cache/topographic_metrics")
   
-  # Connect to NRCAN Digital Surface Model COG
-  topo_cog <- terra::rast(paste0("/vsicurl/", url_nrcan_elevation))
-  
-  # Get NRCAN DSM projection (Canada Lambert)
-  nrcan_proj <- terra::crs(topo_cog)
+  # Setup parallel processing if n_workers is supplied
+  if(!is.null(n_workers)) { 
+    future::plan(
+      strategy = "future::multisession",
+      workers = n_workers,
+      gc = TRUE
+    )
+  }
   
   # Create list of topography metrics raster file paths for each study fire
-  topography_raster_paths <- study_fire_sampling_polygons %>% 
+  topography_raster_paths <- sampling_polygons %>% 
     # Split by study fire
     dplyr::group_split(fire_id) %>% 
     # Extract digital surface model for each study fire and compute topo metrics
-    purrr::map(
+    furrr::future_map(
       function(study_fire) {
+        
+        # Connect to NRCAN Digital Surface Model COG, fetch projection
+        topo_cog <- terra::rast(paste0("/vsicurl/", url_nrcan_elevation))
+        nrcan_proj <- terra::crs(topo_cog)
+        
         # Reproject study fire polygon and add buffer to eliminate edge effects
         aoi_buf <- terra::vect(study_fire) %>% 
           terra::project(y = nrcan_proj) %>% 
@@ -82,10 +89,15 @@ get_topography_rasters <- function(study_fire_sampling_polygons) {
           fire_id = study_fire$fire_id,
           raster_file_path = raster_file_path
         )
-      }
+      },
+      # Pass seed to {future} to avoid complaints, schedule one task at a time
+      .options = furrr::furrr_options(seed = TRUE, scheduling = Inf)
     ) %>%
     # Combine
     dplyr::bind_rows()
+  
+  # Close parallel processing if n_workers is supplied
+  if(!is.null(n_workers)) { future::plan(strategy = "future::sequential") }
   
   # Return list of topography raster file paths
   return(topography_raster_paths)
