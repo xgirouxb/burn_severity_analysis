@@ -1,30 +1,29 @@
 get_ntems_land_cover_class_tbl <- function(
-    study_sampling_points,
+    sampling_points,
     neighbourhood_radius = c(100, 500, 1000)
 ){
   
   # -------------------------------------------------------------------------- #
   # Step 1: Prep environment and import modules                             ####
-
+  
   # Import and initialize Earth Engine API
   ee <- reticulate::import("ee")
   ee$Initialize(project = EARTH_ENGINE_PROJECT_ID)
-
+  
   # Import required module
-  get_lc <- reticulate::import_from_path("get_ntems_land_cover_classes", "py")
-
+  get_lc <- reticulate::import_from_path("get_ntems_lc_classes", "py")
+  
   # Feature collection of burn sample points
-  ee_burn_sample_points <- ee$FeatureCollection(gee_assetid_sample_points)
+  ee_sample_points <- ee$FeatureCollection(gee_assetid_sample_points)
   
   # Image collection of forest land cover (doi.org/10.1016/j.rse.2021.112780)
   ee_forest_land_cover <- ee$ImageCollection(gee_assetid_land_cover)
-
-  # Sanity check: `study_sampling_points` in GEE assets should have same number 
-  #                of sample points as local `study_sampling_points` target.
-  if (ee_burn_sample_points$size()$getInfo() != nrow(study_sampling_points)) {
-    # ...if it does not stop and print error
+  
+  # Sanity check: `sampling_points` in GEE assets should have same number
+  #                of observations as local `sampling_points` target.
+  if (ee_sample_points$size()$getInfo() != nrow(sampling_points)) {
     stop(
-      "⚠️`study_sampling_points` in GEE assets does not match local copy, upload latest version!",
+      "⚠️ `sampling_points` in GEE assets does not match local copy, upload latest version!"
     )
   }
   
@@ -34,51 +33,104 @@ get_ntems_land_cover_class_tbl <- function(
   # List of radii to compute land cover class proportions
   ee_radius_list <- ee$List(neighbourhood_radius)
   
-  # Launch task on EE
-  sample_task <- get_lc$sample_ntems_lc_classes(
-    sample_pts = ee_burn_sample_points,
-    forest_land_cover = ee_forest_land_cover,
-    radius_list = ee_radius_list
-  )
+  # Get list of unqiue fire_id's in local `sampling_points` target
+  fire_id_list <- unique(sampling_points$fire_id)
+  
+  # Launch task on EE for each fire, return table of fire_ids with EE task ids
+  ntems_tasks <- purrr::map(
+    fire_id_list,
+    function(fire_id) {
+      ee_task_id <- get_lc$sample_ntems_lc_classes(
+        sample_pts = ee_sample_points$filter(ee$Filter$eq("fire_id", fire_id)),
+        forest_land_cover = ee_forest_land_cover,
+        radius_list = ee_radius_list,
+        export_filename = paste0("ntems_", fire_id)
+      )
+      return(tibble::tibble(fire_id = fire_id, ee_task_id = ee_task_id$id))
+    }
+  ) %>% 
+    # Bind rows
+    dplyr::bind_rows()
   
   # -------------------------------------------------------------------------- #
-  # Step 3: Monitor task on Earth Engine server                             ####
+  # Step 3: Monitor tasks on Earth Engine server ####
   
-  # Monitor task until it is inactive
-  task_status <- monitor_gee_tasks(sample_task$id, check_interval_minutes = 5)
+  # Monitor tasks until all are inactive
+  task_status <- monitor_gee_tasks(ee_task_id = ntems_tasks$ee_task_id)
   
-  # Sanity check: If task did not complete successfully...
-  if (task_status$ee_task_status != "COMPLETED") {
-    # ...stop and print error
-    stop("⚠️ NTEMS sampling failed, see failed Earth Engine tasks.")
+  # Join task status to table with fire_id
+  ntems_tasks <- dplyr::left_join(ntems_tasks, task_status, by = "ee_task_id")
+  
+  # Sanity check: all tasks should be COMPLETED
+  incomplete_task <- ntems_tasks %>% 
+    dplyr::filter(ee_task_status != "COMPLETED")
+  if (nrow(incomplete_task) > 0) {
+    # ...if there are incomplete tasks, stop and print fire_ids
+    cat("\n⚠️ NTEMS land cover sampling failed for some study fires:\n\n")
+    print(incomplete_task)
+    stop("Targets pipeline interupted, see failed Earth Engine tasks.")
   }
   
   # -------------------------------------------------------------------------- #
-  # Step 4: Get output table from google drive                              ####
+  # Step 4: Download land cover sample tables from Drive to local cache ####
   
-  # List all files in the folder that match the name pattern
-  matched_files <- googledrive::drive_ls(path = "ee_bc_burn_severity/") %>%
-    dplyr::filter(name == "ntems_land_cover_proportion_samples.csv") %>%
-    # Parse `drive_resource` list to extract file timestamp
-    dplyr::mutate(created_time = purrr::map_chr(drive_resource, ~ .x$createdTime)) %>%
-    # Sort by most recent to oldest file
-    dplyr::arrange(dplyr::desc(created_time))
+  # List files in Google Drive project folder
+  list_drive_file_names <- googledrive::drive_ls(path = "ee_bc_burn_severity/")
   
-  # Sanity check: Was a matching file found?
-  if (nrow(matched_files) == 0) {
-    stop("⚠️ No file named 'ntems_land_cover_proportion_samples.csv' found in the folder.")
+  # Get list of matching csv tables
+  matched_ntems_tbls <- purrr::map(
+    ntems_tasks$fire_id,
+    function(fire_id) {
+      list_drive_file_names %>% 
+        dplyr::filter(name == paste0("ntems_", fire_id, ".csv")) %>%
+        # Parse the Drive metadata list to extract the file creation timestamp
+        dplyr::mutate(
+          fire_id = fire_id,
+          timestamp = purrr::map(
+            drive_resource,
+            function(x) { lubridate::ymd_hms(x$createdTime) }
+          )
+        ) %>% 
+        dplyr::select(fire_id, name, id, timestamp) %>% 
+        tidyr::unnest(timestamp) %>% 
+        # Get only most recent file if multiple copies
+        dplyr::slice_max(order_by = timestamp, n = 1, with_ties = FALSE)
+    }
+  ) %>% 
+    # Bind rows
+    dplyr::bind_rows()
+  
+  # Sanity check: all fire ids should have corresponding CSV on Drive
+  missing_ntems_csvs <- setdiff(ntems_tasks$fire_id, matched_ntems_tbls$fire_id)
+  if (length(missing_ntems_csvs) > 0) {
+    cat("\n⚠️ The following RBR raster files are missing from Google Drive:\n")
+    cat(paste0("\t* ntems_", missing_ntems_csvs, ".csv"), sep = "\n")
+    cat("\n")
+    stop("Pipeline halted: Missing expected NTEMS CSV tables on Google Drive.")
   }
   
   # Create local cache for NTEMS samples
-  ntems_cache <- fs::path('data/_cache/ntems_land_cover')
-  fs::dir_create(ntems_cache)
+  ntems_cache <- fs::dir_create('data/_cache/ntems_land_cover')
   
-  # Download the most recent matching file
-  googledrive::drive_download(
-    file = dplyr::slice(matched_files, 1),
-    path = fs::path(ntems_cache, "ntems_land_cover_proportion_samples.csv"),
-    overwrite = TRUE,
-  )
+  # Download NTEMS land cover sample tables to local cache
+  ntems_csv_paths <- matched_ntems_tbls %>% 
+    dplyr::group_split(fire_id) %>% 
+    purrr::map(
+      function(ntems_tbl) {
+        googledrive::drive_download(
+          file = googledrive::as_id(ntems_tbl$id),
+          path = fs::path(ntems_cache, paste0(ntems_tbl$fire_id, ".csv")),
+          overwrite = TRUE,
+        )
+      }
+    ) %>% 
+    # Bind rows and return only fire_id and path to local cache
+    dplyr::bind_rows() %>% 
+    dplyr::mutate(fire_id = fs::path_ext_remove(fs::path_file(local_path))) %>% 
+    dplyr::select(fire_id, csv_file_path = local_path)
+  
+  # -------------------------------------------------------------------------- #
+  # Step 5: Read all tables and export as target ####
   
   # Create column selectors to organize columns by neighbourhood size
   radius_selectors <- purrr::map(
@@ -95,13 +147,13 @@ get_ntems_land_cover_class_tbl <- function(
   )
   
   # Read in land cover samples
-  ntems_land_cover_classes <- readr::read_csv(
-    file = fs::path(ntems_cache, "ntems_land_cover_proportion_samples.csv"),
+  ntems_land_cover_class_tbl <- readr::read_csv(
+    file = ntems_csv_paths$csv_file_path,
     show_col_types = FALSE
   ) %>% 
     # Reorder columns
     dplyr::select(id, fire_id, fire_year, ntems_land_cover, !!!radius_selectors)
   
   # Return
-  return(ntems_land_cover_classes)
+  return(ntems_land_cover_class_tbl)
 }

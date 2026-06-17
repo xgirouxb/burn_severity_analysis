@@ -28,7 +28,8 @@ def lc_binary_bands(img):
 def sample_ntems_lc_classes(
   sample_pts,
   forest_land_cover = ee.ImageCollection("projects/sat-io/open-datasets/CA_FOREST_LC_VLCE2"),
-  radius_list=ee.List([1000])
+  radius_list=ee.List([1000]),
+  export_filename='ntems'
 ):
     """
     Samples forest land cover type and porportions around a fire sampling points,
@@ -41,6 +42,7 @@ def sample_ntems_lc_classes(
         radius_list (ee.List): List containing radius or radii in meters for
                                buffer(s) used to compute proportions around
                                each sample point.
+        export_filename: string; File name of CSV exported to Drive.
     
     Returns:
         ee.batch.Task: The export task object.
@@ -144,7 +146,7 @@ def sample_ntems_lc_classes(
     # Export to Google Drive
     task = ee.batch.Export.table.toDrive(
         collection=sampled_lc,
-        description='ntems_land_cover_proportion_samples',
+        description=export_filename,
         folder='ee_bc_burn_severity',
         fileFormat='CSV',
         selectors=property_names

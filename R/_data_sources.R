@@ -101,5 +101,5 @@ url_ccfm_forest_tenure_2020 <- "https://ca.nfis.org/fss/fss?command=retrieveById
 
 # ---------------------------------------------------------------------------- #
 # Burn sample points
-# Copy of local `burn_sample_points` target sf object uploaded to GEE assets 
-gee_assetid_sample_points <- "projects/ee-bc-burn-severity/assets/study_sampling_points"
+# Copy of local `sample_points` target sf object uploaded to GEE assets 
+gee_assetid_sample_points <- "projects/ee-bc-burn-severity/assets/sampling_points"
