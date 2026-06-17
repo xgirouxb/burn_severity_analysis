@@ -68,7 +68,7 @@ get_ntems_land_cover_class_tbl <- function(
     # ...if there are incomplete tasks, stop and print fire_ids
     cat("\n⚠️ NTEMS land cover sampling failed for some study fires:\n\n")
     print(incomplete_task)
-    stop("Targets pipeline interupted, see failed Earth Engine tasks.")
+    stop("Targets pipeline interrupted, see failed Earth Engine tasks.")
   }
   
   # -------------------------------------------------------------------------- #
