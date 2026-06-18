@@ -1,4 +1,4 @@
-impute_forest_variables <- function(forest_variables){
+impute_forest_variables <- function(forest_variables, vri_species_key){
 
   # -------------------------------------------------------------------------- #
   # Step 1: Consolidate stand age/spp from VRI, CC, HF, CanLaD and RESULTS ####
@@ -8,7 +8,7 @@ impute_forest_variables <- function(forest_variables){
     # Clean-up samples not within rasters ( n = 1)
     dplyr::filter(!is.na(planted_distance)) %>% 
     # Clean-up water land cover class
-    dplyr::filter(vri_bclcs_level_4 != "WA", lc_land_cover != "water") %>% 
+    dplyr::filter(vri_bclcs_level_4 != "WA", ntems_land_cover != "water") %>% 
     dplyr::mutate(
       # Consolidate years since historical fires and CanLaD-detected fires
       years_since_fire_disturbance = dplyr::if_else(
@@ -97,13 +97,13 @@ impute_forest_variables <- function(forest_variables){
         & !dplyr::if_all(dplyr::all_of(vri_treed_num_vars), ~ . == 0),
       # Flag where VRI BCLCS level 4 is non-treed class
       is_non_treed = !(vri_bclcs_level_4 %in% c("TC", "TB", "TM"))
-    ) %>% 
+    ) %>%
     # ------------------------------------------------------------------------ #
-    # 3.2 Assign stand species
+    # 3.2 Assign stand species in planted forest stands, join stand genus
     dplyr::mutate(
       # If stand is planted, use spp from RESULTS (even if NA), else use VRI
-      stand_spp = dplyr::if_else(is_planted, fd_planted_spp, vri_lead_spp)
-    ) %>% 
+      stand_spp = dplyr::if_else(is_planted, fd_planted_spp, vri_lead_spp),
+    ) %>%
     # ------------------------------------------------------------------------ #
     # 3.3 Replace false 0s that should be missing data
     dplyr::mutate(
@@ -126,17 +126,45 @@ impute_forest_variables <- function(forest_variables){
       # Reclass stand species to none
       stand_spp = dplyr::if_else(
         !is_planted & is_all_na & is_non_treed,
-        "none",
+        "None",
         stand_spp
       )
-    ) %>% 
+    ) %>%
     # ------------------------------------------------------------------------ #
     # 3.5 Clean-up
     dplyr::select(-dplyr::starts_with("is_"))
+
+  # -------------------------------------------------------------------------- #
+  # Step 4: Prepare stand species and genus ####
+  spp_forest_variables <- reclass_forest_variables %>%
+    # Join stand genus from VRI species key
+    dplyr::left_join(
+      y = vri_species_key %>% 
+        dplyr::select(stand_genus = common_genus, common_name) %>% 
+        dplyr::distinct(),
+      by = c("stand_spp" = "common_name")
+    ) %>% 
+    # Pool rarer species
+    dplyr::mutate(
+      stand_spp = dplyr::case_when(
+        # Pool all broadleaf species into their respective genera
+        stand_genus == "Alder" ~ "Alder spp.",
+        stand_genus == "Birch" ~ "Birch spp.",
+        stand_genus == "Poplar" ~ "Poplar spp.",
+        # Pool spruce hybrids
+        stringr::str_detect(stand_spp, "spruce hybrid") ~ "Spruce hybrid",
+        # Fold shore pine into lodgepole pine
+        stand_spp == "Shore pine" ~ "Lodgepole pine",
+        # If spp is unknown, set to NA
+        stand_spp == "Unknown" ~ NA_character_,
+        # Else
+        TRUE ~ stand_spp
+      )
+    )
   
   # -------------------------------------------------------------------------- #
-  # Step 4: Get spatial coordinates to spatialize imputation ####
-  forest_variables_tbl <- reclass_forest_variables %>% 
+  # Step 5: Get spatial coordinates to spatialize imputation ####
+  forest_variables_tbl <- spp_forest_variables %>% 
     dplyr::mutate(
       x = sf::st_coordinates(geometry)[, 1],
       y = sf::st_coordinates(geometry)[, 2]
@@ -144,7 +172,7 @@ impute_forest_variables <- function(forest_variables){
     sf::st_drop_geometry()
 
   # -------------------------------------------------------------------------- #
-  # Step 5: Impute with MICE                                                ####
+  # Step 6: Impute with MICE                                                ####
   
   # List ID variables to exclude from prediction/imputation
   vri_id_vars <- c("fire_id", "fire_year", "id")
@@ -153,12 +181,12 @@ impute_forest_variables <- function(forest_variables){
   coords <- c("x", "y")
   
   # List landscape class categorical grouping variable, only for prediction
-  lc_class_cat_vars <- c("vri_bclcs_level_4", "lc_land_cover")
+  land_cover_cat_vars <- c("vri_bclcs_level_4", "ntems_land_cover")
   
   # List land cover proportion (within 100m only) variables, only for prediction 
-  lc_prop_vars <- c(
-    "lc_prop_coniferous_100m", "lc_prop_deciduous_100m",
-    "lc_prop_nonfuel_100m", "lc_prop_wetland_100m"
+  ntems_prop_vars <- c(
+    "ntems_prop_coniferous_100m", "ntems_prop_deciduous_100m",
+    "ntems_prop_nonfuel_100m", "ntems_prop_wetland_100m"
   )
   
   # List distance to managed landscapes, only for prediction
@@ -192,8 +220,8 @@ impute_forest_variables <- function(forest_variables){
         x = c(
           vri_id_vars,
           coords,
-          lc_class_cat_vars,
-          lc_prop_vars,
+          land_cover_cat_vars,
+          ntems_prop_vars,
           managed_distance,
           biogeo_cat_vars,
           topo_num_vars,
@@ -205,8 +233,8 @@ impute_forest_variables <- function(forest_variables){
     # Assign proper data types for mice
     dplyr::mutate(
       dplyr::across(dplyr::all_of(coords), as.numeric),
-      dplyr::across(dplyr::all_of(lc_class_cat_vars), as.factor),
-      dplyr::across(dplyr::all_of(lc_prop_vars), as.numeric),
+      dplyr::across(dplyr::all_of(land_cover_cat_vars), as.factor),
+      dplyr::across(dplyr::all_of(ntems_prop_vars), as.numeric),
       dplyr::across(dplyr::all_of(managed_distance), as.numeric), 
       dplyr::across(dplyr::all_of(biogeo_cat_vars), as.factor), 
       dplyr::across(dplyr::all_of(topo_num_vars), as.numeric),
