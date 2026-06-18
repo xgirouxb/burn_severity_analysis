@@ -91,8 +91,8 @@ find_biased_burn_ratio_sample_ids <- function(
   
   # Identify harvest/plantings in 1-year window before and after study fire
   fd_harvest_planting_disturbed_sample_ids <- sampling_points %>% 
-    # Nest by study fire and year
-    dplyr::group_nest(fire_id, fire_year) %>% 
+    # Nest by study fire
+    dplyr::group_nest(fire_id) %>% 
     # Join table of forest management raster file names
     dplyr::left_join(forestry_disturbance_rasters, by = "fire_id") %>% 
     # Sample rasters
@@ -100,22 +100,19 @@ find_biased_burn_ratio_sample_ids <- function(
       forestry_disturbance_samples = purrr::map2(
         raster_file_path,
         data,
-        ~ terra::extract(x = terra::rast(paste(.x)), y = terra::vect(.y)) %>% 
-          tibble::as_tibble() %>% 
-          dplyr::mutate(id = .y$id, .before = dplyr::everything()) %>% 
-          dplyr::select(-ID) 
+        sample_raster
       )
     ) %>% 
     # Unnest and clean-up
-    dplyr::select(fire_id, fire_year, forestry_disturbance_samples) %>%
-    tidyr::unnest(cols = c(forestry_disturbance_samples)) %>% 
+    dplyr::select(forestry_disturbance_samples) %>%
+    tidyr::unnest(cols = c(forestry_disturbance_samples)) %>%
     # Filter harvest or planting within 1-year window before and after study fire
     dplyr::filter(
       # Harvest in 1-year window, OR
       abs(harvest_year - fire_year) <= 1 |
         # Planting in 1-year window
         abs(res_planting_year - fire_year) <= 1
-    ) %>% 
+    ) %>%
     # Get vector of ids
     dplyr::pull(id)
   

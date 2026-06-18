@@ -311,3 +311,27 @@ compute_pdir <- function(x) {
   # Return in Rad (MJ * (cm^–2) * (year^–1)) 
   return(pdir)
 }
+
+#' Sample a raster at point locations.
+#'
+#' A helper function that extracts raster values at sf point locations,
+#' returning a tibble with the original point attributes bound to the
+#' extracted raster values.
+#'
+#' @param raster_file_path A character string giving the file path to a raster
+#'   readable by \code{terra::rast()}.
+#' @param sf_points An \code{sf} POINTS object containing point geometries at 
+#'                  which raster values will be extracted.
+#'
+#' @return
+#' A \code{tibble} containing the attributes of \code{sf_points} bound to the
+#' extracted raster values, with one row per point.
+#'
+sample_raster <- function(raster_file_path, sf_points) {
+  terra::extract(
+    x = terra::rast(raster_file_path),
+    y = terra::vect(sf_points),
+    bind = TRUE
+  ) %>%
+    tibble::as_tibble()
+}
