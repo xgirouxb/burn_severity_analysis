@@ -23,7 +23,7 @@ get_historical_fire_polygons <- function(sampling_polygons) {
     # Bind rows
     dplyr::bind_rows() %>% 
     # Filter for fires in British Columbia
-    dplyr::filter(ADMIN_AREA == "BC") %>% 
+    dplyr::filter(ADMIN_NAME == "BC") %>% 
     # Add some unique historical fire attributes 
     dplyr::mutate(
       hf_fire_src = "nbac",
