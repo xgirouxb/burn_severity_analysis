@@ -2,15 +2,15 @@ prep_forestry_disturbance_rasters <- function(
     sampling_polygons,
     cutblock_polygons,
     historical_fire_polygons,
-    results_polygons
+    results_polygons,
+    vri_species_key
 ) {
   
   # Define local cache directory for output rasters, create if it doesn't exist
-  disturbance_cache <- fs::path("data/_cache/forestry_disturbance")
-  if (!fs::dir_exists(disturbance_cache)) { fs::dir_create(disturbance_cache) }
-  
+  disturbance_cache <- fs::dir_create("data/_cache/forestry_disturbance")
+
   # Create list of forestry disturbance raster file paths for each study fire
-  forestry_disturbance_paths <- study_fire_sampling_polygons %>%
+  forestry_disturbance_paths <- sampling_polygons %>%
     # Split by fire id
     dplyr::group_split(fire_id) %>%
     # Create list of forestry disturbance rasters written to cache
@@ -24,7 +24,8 @@ prep_forestry_disturbance_rasters <- function(
         max_dist <- 10000
         
         # Get study fire attributes for clearer syntax below
-        aoi_buf <- terra::buffer(x = terra::vect(study_fire), width = max_dist)
+        aoi_buf_sf <- sf::st_buffer(study_fire, dist = max_dist)
+        aoi_buf <- terra::vect(aoi_buf_sf)
         
         # Create template raster at 30-m resolution 
         template_raster <- terra::rast(aoi_buf, resolution = 30, vals = 1) %>% 
@@ -35,13 +36,19 @@ prep_forestry_disturbance_rasters <- function(
         # Step 1: Subset disturbance datasets ####
         
         # Import consolidated cutblocks that intersect/predate study fire buffer
-        cc_sub <- sf::st_filter(cutblock_polygons, study_fire) %>% 
-          dplyr::filter(cc_harvest_start_year < study_fire$fire_year) %>%
+        cc_sub <- sf::st_filter(cutblock_polygons, aoi_buf_sf) %>% 
+          # Only retain years that predate fire
+          dplyr::mutate(
+            dplyr::across(
+              dplyr::ends_with("_year"),
+              ~ dplyr::if_else(.x < study_fire$fire_year, .x, NA_real_)
+            )
+          ) %>% 
           # Select variables of interest
           dplyr::select(cc_harvest_start_year, cc_harvest_end_year)
         
         # Import historical fires that intersect/predate study fire buffer
-        hf_sub <- sf::st_filter(historical_fire_polygons, study_fire) %>% 
+        hf_sub <- sf::st_filter(historical_fire_polygons, aoi_buf_sf) %>% 
           dplyr::filter(hf_fire_year < study_fire$fire_year) %>%
           # Select variables of interest
           dplyr::select(hf_fire_year)
@@ -144,13 +151,13 @@ prep_forestry_disturbance_rasters <- function(
         
         ## 2.4 Rasterize leading planted species ####
         
-        # List of species and associated codes for raster attribute table
+        # List of all species and associated values for raster attribute table
         spp_rat <- tibble::tibble(
-          value = 1:7,
-          # Extra levels included here for consistency with VRI lead spp
-          res_lead_spp = c("douglas-fir", "fir", "other_coniferous",
-                           "other_deciduous", "pine", "poplar", "spruce")
-        ) 
+          value = 1:length(vri_species_key$common_name),
+          res_lead_spp = vri_species_key$common_name
+        ) %>% 
+          # Remove dupes (spp table sometimes repeats genera and species names)
+          dplyr::distinct(res_lead_spp, .keep_all = TRUE)
         
         # Get polygons of planted species
         planted_spp_polygons <- planted_polygons %>%
@@ -337,9 +344,9 @@ prep_forestry_disturbance_rasters <- function(
           paste0(study_fire$fire_id, ".tif")
         )
         
-        # Write forestry disturbance years to file  
+        # Write forestry disturbance years to file
         terra::writeRaster(
-          x = forestry_disturbance_raster, 
+          x = forestry_disturbance_raster,
           filename = raster_file_path,
           datatype = "INT2U",
           overwrite = TRUE
