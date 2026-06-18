@@ -4,10 +4,8 @@ get_canlad_disturbance_rasters <- function(sampling_polygons) {
   canlad_years <- 1985:(max(study_years) - 1)
   
   # Define local cache directory for CanLaD rasters, create if it doesn't exist
-  canlad_cache <- fs::path("data/_cache/canlad")
-  if (!fs::dir_exists(canlad_cache)) { fs::dir_create(canlad_cache) }
-  raw_canlad_cache <- fs::path("data/_cache/canlad/raw")
-  if (!fs::dir_exists(raw_canlad_cache)) { fs::dir_create(raw_canlad_cache) }
+  canlad_cache <- fs::dir_create("data/_cache/canlad")
+  raw_canlad_cache <- fs::dir_create("data/_cache/canlad/raw")
   
   # Get URLs for CanLaD rasters to cache locally
   raster_urls <- get_url_list(url_canlad_1985_2024) %>%
@@ -29,7 +27,7 @@ get_canlad_disturbance_rasters <- function(sampling_polygons) {
   
   # Sanity check, stop if cache does not contain all the CanLaD rasters
   if (!setequal(raster_paths, fs::dir_ls(raw_canlad_cache))) {
-    stop("There are uncached CanLaD rasters.")
+    stop("⚠️ There are uncached CanLaD rasters.")
   }
   
   # Get CanLaD projection (Canada Lambert)
@@ -122,12 +120,8 @@ get_canlad_disturbance_rasters <- function(sampling_polygons) {
 get_precanlad_disturbance_rasters <- function(sampling_polygons) {
   
   # Define local cache directory for pre-CanLaD rasters
-  precanlad_cache <- fs::path("data/_cache/precanlad")
-  if (!fs::dir_exists(precanlad_cache)) { fs::dir_create(precanlad_cache) }
-  raw_precanlad_cache <- fs::path("data/_cache/precanlad/raw")
-  if (!fs::dir_exists(raw_precanlad_cache)) { 
-    fs::dir_create(raw_precanlad_cache) 
-  }
+  precanlad_cache <- fs::dir_create("data/_cache/precanlad")
+  raw_precanlad_cache <- fs::dir_create("data/_cache/precanlad/raw")
   
   # Get URLs for CanLaD rasters to cache locally
   raster_urls <- get_url_list(url_precanlad_1965_1984) %>%
@@ -151,7 +145,7 @@ get_precanlad_disturbance_rasters <- function(sampling_polygons) {
   
   # Sanity check, stop if cache does not contain all the pre-CanLaD rasters
   if (!setequal(raster_paths, fs::dir_ls(raw_precanlad_cache))) {
-    stop("There are uncached pre-CanLaD rasters.")
+    stop("⚠️ There are uncached pre-CanLaD rasters.")
   }
   
   # Get pre-CanLaD projection (Canada Lambert)

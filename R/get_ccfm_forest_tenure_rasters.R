@@ -22,8 +22,7 @@ get_ccfm_forest_tenure_rasters <- function(sampling_polygons) {
   names(ccfm_tenure_2020) <- "ccfm_tenure"
   
   # Define/create local cache directory for CCFM forest tenure rasters
-  tenure_cache <- fs::path("data/_cache/ccfm_forest_tenure")
-  if (!fs::dir_exists(tenure_cache)) { fs::dir_create(tenure_cache) }
+  tenure_cache <- fs::dir_create("data/_cache/ccfm_forest_tenure")
   
   # Create list of CCFM forest tenure file paths for each study fire
   ccfm_tenure_paths <- sampling_polygons %>% 
