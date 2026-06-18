@@ -10,7 +10,8 @@ Sys.setenv(R_LIBCURL_SSL_REVOKE_BEST_EFFORT = TRUE)
 # Set longer timeout for download.file()
 options(timeout = max(1000, getOption("timeout")))
 
-# Set 3GB limit to each core in future
+# Raise {future} serialization warning threshold to 3GB
+# (suppresses warnings when passing large objects to parallel workers)
 options('future.globals.maxSize' = 3 * 1024^3)
 
 # Define and set to miniforge conda env for reticulate
