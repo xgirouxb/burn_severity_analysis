@@ -35,41 +35,20 @@ prep_vri_polygons <- function(
       y = vri_species_key,
       by = dplyr::join_by(species_cd_1 == vri_species_code)
     ) %>%
-    # Parse leading species names and pool rarer species into genera
-    dplyr::mutate(
-      common_genus = stringr::str_to_lower(common_genus),
-      common_name = stringr::str_to_lower(common_name),
-      vri_lead_genus = dplyr::case_when(
-        # All broadleaf together
-        common_genus %in% c("alder", "birch", "maple", "poplar") |
-          common_name == "unknown broadleaf"
-        ~ "broadleaf",
-        # Other coniferous
-        common_genus %in% c("larch", "hemlock", "cedar", "cypress", "juniper") |
-          common_name == "unknown conifer"
-        ~ "other_coniferous",
-        # Unknown species set to NA
-        common_name == "unknown" ~ NA_character_,
-        # Leave remainder unchanged
-        TRUE ~ common_genus
-      )
-    ) %>%
     # Clean up
     dplyr::select(
       fire_id, fire_year, feature_id,
-      vri_lead_genus, vri_lead_spp = common_name, species_cd_2
+      vri_lead_spp = common_name, species_cd_2
     ) %>%
     # Join by secondary species code in VRI species key
     dplyr::left_join(
       y = vri_species_key,
       by = dplyr::join_by(species_cd_2 == vri_species_code)
     ) %>%
-    # Parse secondary species names
-    dplyr::mutate(vri_second_spp = stringr::str_to_lower(common_name)) %>% 
-    # Clean up
+    # Clean up and save second species name
     dplyr::select(
       fire_id, fire_year, feature_id,
-      vri_lead_spp = common_name, vri_lead_genus, vri_second_spp
+      vri_lead_spp, vri_second_spp = common_name
     )
   
   # -------------------------------------------------------------------------- #
@@ -143,10 +122,9 @@ prep_vri_polygons <- function(
       interpretation_year, # Attribute data interpreted
       # Disturbance date
       harvest_year,
-      # Stand composition
-      vri_lead_genus, # Lead genus
+      # Stand species
       vri_lead_spp, # Lead species
-      vri_second_spp, # Seconday species
+      vri_second_spp, # Second species
       # Stand attributes
       mean_proj_height, # Mean projected height for 2 leading species
       mean_proj_age, # Weighted mean projected age for 2 leading species
