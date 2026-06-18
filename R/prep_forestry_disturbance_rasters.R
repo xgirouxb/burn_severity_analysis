@@ -1,5 +1,5 @@
 prep_forestry_disturbance_rasters <- function(
-    study_fire_sampling_polygons,
+    sampling_polygons,
     cutblock_polygons,
     historical_fire_polygons,
     results_polygons

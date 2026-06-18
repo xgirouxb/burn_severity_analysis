@@ -1,4 +1,4 @@
-get_canlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
+get_canlad_disturbance_rasters <- function(sampling_polygons) {
   
   # Define CanLaD years to download (year preceding most recent study fire)
   canlad_years <- 1985:(max(study_years) - 1)
@@ -36,7 +36,7 @@ get_canlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
   canlad_proj <- terra::crs(terra::rast(raster_paths[1]))
   
   # Create list of CanLaD most recent harvest and fire years for each study fire
-  canlad_disturbance_paths <- study_fire_sampling_polygons %>% 
+  canlad_disturbance_paths <- sampling_polygons %>% 
     # Split by study fire
     dplyr::group_split(fire_id) %>% 
     # Get year of most recent harvest and most recent wildfire in CanLaD stack
@@ -119,7 +119,7 @@ get_canlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
   return(canlad_disturbance_paths)
 }
 
-get_precanlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
+get_precanlad_disturbance_rasters <- function(sampling_polygons) {
   
   # Define local cache directory for pre-CanLaD rasters
   precanlad_cache <- fs::path("data/_cache/precanlad")
@@ -158,7 +158,7 @@ get_precanlad_disturbance_rasters <- function(study_fire_sampling_polygons) {
   precanlad_proj <- terra::crs(terra::rast(raster_paths[1]))
   
   # Create list of pre-CanLaD harvest and fire years for each study fire
-  precanlad_disturbance_paths <- study_fire_sampling_polygons %>% 
+  precanlad_disturbance_paths <- sampling_polygons %>% 
     # Split by study fire
     dplyr::group_split(fire_id) %>% 
     # Get year of harvest and wildfire disturbances in pre-CanLaD image
