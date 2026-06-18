@@ -208,6 +208,7 @@ prep_results_polygons <- function(
       #     Typical chronology where "L": approval --> logging --> planting 
       #     Typical chronology where "P": pest --> approval --> planting
       #     Typical chronology where "R": approval --> rehab --> planting 
+      #     Typical chronology where "E": approval --> enhancement --> planting 
       edge_case_year = dplyr::case_when(
         # IF denudation 1 is logging (L) and there is no completion date
         DENUDATION_1_DISTURBANCE_CODE == "L" & is.na(denudation1_year) ~
@@ -219,6 +220,10 @@ prep_results_polygons <- function(
           pmax(disturbance_start_year, approve_year, na.rm = TRUE),
         # ELSE IF denudation 1 is rehab (R) and there is no completion date
         DENUDATION_1_DISTURBANCE_CODE == "R" & is.na(denudation1_year) ~
+          # ASSIGN latest between approval and disturbance start
+          pmax(disturbance_start_year, approve_year, na.rm = TRUE),
+        # ELSE IF denudation 1 is enhancement (E) and there is no completion date
+        DENUDATION_1_DISTURBANCE_CODE == "E" & is.na(denudation1_year) ~
           # ASSIGN latest between approval and disturbance start
           pmax(disturbance_start_year, approve_year, na.rm = TRUE),
         # ELSE
@@ -288,37 +293,16 @@ prep_results_polygons <- function(
       y = vri_species_key,
       by = c("SILV_TREE_SPECIES_CODE" = "vri_species_code")
     ) %>% 
-    # Common genus name to lower case
-    dplyr::mutate(common_genus = stringr::str_to_lower(common_genus)) %>% 
     # Sum of number planted for each species in each opening
-    dplyr::group_by(fire_id, fire_year, OPENING_ID, common_genus) %>% 
-    dplyr::summarise(n = sum(NUMBER_PLANTED), .groups = "drop_last") %>% 
+    dplyr::group_by(fire_id, fire_year, OPENING_ID, common_name) %>%
+    dplyr::summarise(n = sum(NUMBER_PLANTED), .groups = "drop_last") %>%
     # Reverse sort by number of planted trees
     dplyr::arrange(dplyr::desc(n), .by_group = TRUE) %>%
     # Get leading planted species, ungroup
     dplyr::summarise(
-      # Use first non-NA common_genus in order of prevalence
-      res_lead_spp = dplyr::first(common_genus, na_rm = TRUE),
+      # Use first non-NA common_names in order of prevalence
+      res_lead_spp = dplyr::first(common_name, na_rm = TRUE),
       .groups = "drop"
-    ) %>% 
-    # Pool rare species
-    # NB: Not all these are planted species, they are included here verbatim  
-    #     from the VRI pooling method for consistency
-    dplyr::mutate(
-      res_lead_spp = dplyr::case_when(
-        # Other deciduous
-        res_lead_spp %in% c("alder", "birch", "maple") | 
-          res_lead_spp == "unknown deciduous" 
-        ~ "other_deciduous",
-        # Other coniferous
-        res_lead_spp %in% c("larch", "hemlock", "cedar", "cypress", "juniper") |
-          res_lead_spp == "unknown conifer"
-        ~ "other_coniferous",
-        # Unknown species set to NA
-        res_lead_spp == "unknown" ~ NA_character_,
-        # Leave remainder unchanged
-        TRUE ~ res_lead_spp
-      )
     )
   
   # -------------------------------------------------------------------------- #
