@@ -37,7 +37,8 @@ tar_source()
 list(
   
   # -------------------------------------------------------------------------- #
-  # Define study area fires and sampling points for analysis
+  # 1. Define study area fires and sampling points for analysis
+  # -------------------------------------------------------------------------- #
   
   # Define study area as BC admin boundaries
   tar_target(
@@ -49,80 +50,87 @@ list(
     name = study_fire_polygons,
     command = get_study_fire_polygons(study_area, study_years)
   ),
-  # Define sampling area for study fires (include 1km buffer and skips/refugia)
+  # Define sampling area for study fires (include buffer and skips/refugia)
   tar_target(
-    name = study_fire_sampling_polygons,
-    command = get_study_fire_sampling_polygons(study_fire_polygons)
+    name = sampling_polygons,
+    command = define_sampling_polygons(study_fire_polygons)
   ),
   # Define study fire sampling points
   tar_target(
-    name = study_sampling_points,
-    command = define_study_sampling_points(
+    name = sampling_points,
+    command = define_sampling_points(
       study_fire_polygons,
-      study_fire_sampling_polygons
+      sampling_polygons,
+      n_workers = round(parallelly::availableCores()*0.5)
     )
-  ), 
-  
-  # -------------------------------------------------------------------------- #
-  # Prepare response variable - burn severity 
-  
-  #  Import Relativized Burn Ratio images computed via Google Earth Engine API
-  tar_target(
-    name = burn_severity_rasters,
-    command = get_burn_severity_rasters(study_fire_sampling_polygons)
   ),
   
   # -------------------------------------------------------------------------- #
-  # Top-down fire weather covariates 
-  
-  # Import and rasterize fire weather points data from the Canadian Fire Spread
-  # Dataset (CFSDS) repository on OSF
-  tar_target(
-    name = fire_weather_rasters,
-    command = get_fire_weather_rasters(study_fire_sampling_polygons)
-  ),
-  
-  
+  # 2. Import descriptive bio-geographical and fire regime layers for mapping
+  # -------------------------------------------------------------------------- #
+
   # Import NRCAN Canada Vegetation Zone polygons
   tar_target(
     name = vegetation_zone_polygons,
-    command = get_vegetation_zone_polygons(study_fire_sampling_polygons)
+    command = get_vegetation_zone_polygons(sampling_polygons)
   ),
-  # Import BC Biogeoclimatic Zones polygons
+  # Import BC Biogeoclimatic Zone polygons
   tar_target(
     name = biogeoclimatic_zone_polygons,
-    command = get_biogeoclimatic_zone_polygons(study_fire_sampling_polygons)
+    command = get_biogeoclimatic_zone_polygons(sampling_polygons)
+  ),
+  # Import BC Biogeoclimatic Zone groups polygons
+  tar_target(
+    name = biogeoclimatic_zone_groups_polygons,
+    command = get_biogeoclimatic_zone_groups_polygons()
   ),
   # Import Fire Regime Types polygons
   tar_target(
     name = firezone_polygons,
-    command = get_firezone_polygons(study_fire_sampling_polygons)
+    command = get_firezone_polygons(sampling_polygons)
   ),
+
+  # -------------------------------------------------------------------------- #
+  # 3. Prepare response variable - burn severity
+  # -------------------------------------------------------------------------- #
+
+  #  Import Relativized Burn Ratio images computed via Google Earth Engine API
+  tar_target(
+    name = burn_severity_rasters,
+    command = get_burn_severity_rasters(sampling_polygons)
+  ),
+
+  # -------------------------------------------------------------------------- #
+  # 4. Top-down fire weather covariates
+  # -------------------------------------------------------------------------- #
+
+  # Import and rasterize fire weather points data from the Canadian Fire Spread
+  # Dataset (CFSDS) repository on OSF
+  tar_target(
+    name = fire_weather_rasters,
+    command = get_fire_weather_rasters(
+      sampling_polygons,
+      n_workers = round(parallelly::availableCores()*0.2)
+    )
+  ),
+
+  # -------------------------------------------------------------------------- #
+  # 5. Bottom-up topography covariates
+  # -------------------------------------------------------------------------- #
+
   # Import topography metric rasters
   tar_target(
     name = topography_rasters,
-    command = get_topography_rasters(study_fire_sampling_polygons)
+    command = get_topography_rasters(
+      sampling_polygons,
+      n_workers = round(parallelly::availableCores()*0.2)
+    )
   ),
-  # Import BC consolidated cutblocks that intersect study fire sampling polygons
-  tar_target(
-    name = cutblock_polygons,
-    command = get_cutblock_polygons(study_fire_sampling_polygons)
-  ),
-  # Import historical fires that intersect/predate study fire sampling polygons
-  tar_target(
-    name = historical_fire_polygons,
-    command = get_historical_fire_polygons(study_fire_sampling_polygons)
-  ),
-  # Import CanLaD harvest and fire disturbance rasters for study fire areas
-  tar_target(
-    name = canlad_disturbance_rasters,
-    command = get_canlad_disturbance_rasters(study_fire_sampling_polygons)
-  ),
-  # Import pre-CanLaD harvest and fire disturbance rasters for study fire areas
-  tar_target(
-    name = precanlad_disturbance_rasters,
-    command = get_precanlad_disturbance_rasters(study_fire_sampling_polygons)
-  ),
+
+  # -------------------------------------------------------------------------- #
+  # 6. Bottom-up vegetation covariates
+  # -------------------------------------------------------------------------- #
+
   # Track VRI leading species key for any updates on disk
   tar_target(
     name = tracked_vri_species_key,
@@ -138,7 +146,7 @@ list(
   tar_target(
     name = vri_r1_polygons,
     command = get_vri_polygons(
-      sf_aoi = study_fire_sampling_polygons,
+      sf_aoi = sampling_polygons,
       vri_lyr_name = "LYR_R1"
     )
   ),
@@ -146,40 +154,65 @@ list(
   tar_target(
     name = vri_d_polygons,
     command = get_vri_polygons(
-      sf_aoi = study_fire_sampling_polygons,
+      sf_aoi = sampling_polygons,
       vri_lyr_name = "LYR_D"
     )
+  ),
+  # Import land cover classes sampled via Google Earth Engine Python API
+  # see JavaScript equivalent:
+  # https://code.earthengine.google.com/d78997162f4707f78ba8ad0f36572e31
+  tar_target(
+    name = ntems_land_cover_class_tbl,
+    command = get_ntems_land_cover_class_tbl(
+      sampling_points,
+      # Supply vector of neighbourhood radii to compute land cover proportions
+      neighbourhood_radius = c(100, 500, 1000)
+    )
+  ),
+
+  # -------------------------------------------------------------------------- #
+  # 7. Bottom-up vegetation disturbance covariates
+  # -------------------------------------------------------------------------- #
+
+  # Import BC consolidated cutblocks that intersect study fire sampling polygons
+  tar_target(
+    name = cutblock_polygons,
+    command = get_cutblock_polygons(sampling_polygons)
+  ),
+  # Import historical fires that intersect/predate study fire sampling polygons
+  tar_target(
+    name = historical_fire_polygons,
+    command = get_historical_fire_polygons(sampling_polygons)
+  ),
+  # Import CanLaD harvest and fire disturbance rasters for study fire areas
+  tar_target(
+    name = canlad_disturbance_rasters,
+    command = get_canlad_disturbance_rasters(sampling_polygons)
+  ),
+  # Import pre-CanLaD harvest and fire disturbance rasters for study fire areas
+  tar_target(
+    name = precanlad_disturbance_rasters,
+    command = get_precanlad_disturbance_rasters(sampling_polygons)
   ),
   # Import BC RESULTS openings polygons for study years and fires
   tar_target(
     name = results_openings_polygons,
-    command = get_results_openings_polygons(study_fire_sampling_polygons)
+    command = get_results_openings_polygons(sampling_polygons)
   ),
   # Import BC RESULTS plantings polygons for planted openings
   tar_target(
     name = results_plantings_polygons,
     command = get_results_plantings_polygons(results_openings_polygons)
   ),
-  # Import land cover classes sampled via Google Earth Engine
-  # e.g. https://code.earthengine.google.com/d78997162f4707f78ba8ad0f36572e31
-  tar_target(
-    name = land_cover_class_tbl,
-    command = get_land_cover_class_tbl(
-      burn_sample_points,
-      # Supply vector of neighbourhood radii to compute land cover proportions
-      neighbourhood_radius = c(100, 500, 1000)
-    )
-  ),
   # Import CCFM forest tenure rasters
   tar_target(
     name = ccfm_tenure_rasters,
-    command = get_ccfm_forest_tenure_rasters(
-      study_fire_sampling_polygons
-    )
+    command = get_ccfm_forest_tenure_rasters(sampling_polygons)
   ),
 
   # -------------------------------------------------------------------------- #
-  # Prepare input data sets for modelling
+  # 8. Prepare input data sets for modelling
+  # -------------------------------------------------------------------------- #
 
   # Prepare and merge VRI R1 and D polygon layers
   tar_target(
@@ -203,10 +236,11 @@ list(
   tar_target(
     name = forestry_disturbance_rasters,
     command = prep_forestry_disturbance_rasters(
-      study_fire_sampling_polygons,
+      sampling_polygons,
       cutblock_polygons,
       historical_fire_polygons,
-      results_polygons
+      results_polygons,
+      vri_species_key
     )
   ),
   # Find samples with disturbances that may interfere with burn ratios
@@ -214,21 +248,28 @@ list(
   tar_target(
     name = biased_burn_ratio_sample_ids,
     command = find_biased_burn_ratio_sample_ids(
-      burn_sample_points,
+      sampling_points,
       cutblock_polygons,
       historical_fire_polygons,
       results_polygons,
       forestry_disturbance_rasters
     )
   ),
+  
+  # -------------------------------------------------------------------------- #
+  # 8. Sample and impute input data sets for modelling
+  # -------------------------------------------------------------------------- #
+  
   # Sample forest variables: vegetation, land cover, and harvest/fire
   tar_target(
     name = forest_variables,
     command = sample_forest_variables(
-      burn_sample_points,
+      sampling_points,
       biased_burn_ratio_sample_ids,
+      burn_severity_rasters,
+      fire_weather_rasters,
       vri_polygons,
-      land_cover_class_tbl,
+      ntems_land_cover_class_tbl,
       cutblock_polygons,
       historical_fire_polygons,
       results_polygons,
@@ -239,12 +280,13 @@ list(
       topography_rasters,
       vegetation_zone_polygons,
       biogeoclimatic_zone_polygons,
+      biogeoclimatic_zone_groups_polygons,
       firezone_polygons
     )
   ),
   # Reclassify/impute VRI variables
   tar_target(
     name = imputed_forest_variables,
-    command = impute_forest_variables(forest_variables)
+    command = impute_forest_variables(forest_variables, vri_species_key)
   )
 )
