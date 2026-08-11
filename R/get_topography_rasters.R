@@ -25,9 +25,9 @@ get_topography_rasters <- function(sampling_polygons, n_workers = NULL) {
         nrcan_proj <- terra::crs(topo_cog)
         
         # Reproject study fire polygon and add buffer to eliminate edge effects
-        aoi_buf <- terra::vect(study_fire) %>% 
-          terra::project(y = nrcan_proj) %>% 
-          terra::buffer(1060)
+        aoi_buf <- sf::st_buffer(study_fire, dist = 1440) %>% 
+          terra::vect() %>% 
+          terra::project(y = nrcan_proj)
 
         # Crop NRCAN DSM to buffered study fire area, reproject to study proj
         dem <- terra::crop(x = topo_cog, y = aoi_buf, mask = TRUE) %>% 
@@ -90,8 +90,8 @@ get_topography_rasters <- function(sampling_polygons, n_workers = NULL) {
           raster_file_path = raster_file_path
         )
       },
-      # Pass seed to {future} to avoid complaints, schedule one task at a time
-      .options = furrr::furrr_options(seed = TRUE, scheduling = Inf)
+      # Schedule one task at a time
+      .options = furrr::furrr_options(scheduling = Inf)
     ) %>%
     # Combine
     dplyr::bind_rows()
