@@ -26,9 +26,6 @@ define_sampling_points <- function(
     furrr::future_map(
       function(fire_polygon) {
         
-        # Set random seed
-        set.seed(42)
-        
         # Get NBAC polygon that only includes burned areas
         burned_polygon <- study_fire_polygons %>% 
           dplyr::filter(fire_id == unique(fire_polygon$fire_id)) %>% 
@@ -62,7 +59,7 @@ define_sampling_points <- function(
         return(sample_points)
       },
       # Pass seed to {future} to avoid complaints
-      .options = furrr::furrr_options(seed = TRUE)
+      .options = furrr::furrr_options(seed = 42)
     ) %>% 
     # Bind rows
     dplyr::bind_rows() %>% 
