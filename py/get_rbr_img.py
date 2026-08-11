@@ -21,28 +21,40 @@ def compute_nbr(ls_img):
            .copyProperties(ls_img, ['system:time_start'])
     )
 
-# Helper: Mask clear pixels in Landsat surface reflectance images
+# Helper: Mask clear pixels in Landsat Collection 2 Level-2
+#         Surface Seflectance imagery for Landsat 4, 5, 7, 8, and 9.
 def mask_clear_pixels(ls_img):
     
-    # Bits 3,4,5,7: cloud, cloud shadow, snow, water respectively
-    cloud = (1 << 3)
-    cloud_shadow = (1 << 4)
-    snow = (1 << 5)
-    water = (1 << 7)
-
     # Get the pixel QA band
-    qa = ls_img.select('QA_PIXEL')
+    qa = ls_img.select("QA_PIXEL")
+    
+    # Get the stored QA bits
+    # see https://www.usgs.gov/landsat-missions/landsat-collection-2-quality-assessment-bands
+    fill = 1 << 0
+    dilated_cloud = 1 << 1
+    cirrus = 1 << 2 # (L8/9; unused for L4/5/7)
+    cloud = 1 << 3
+    cloud_shadow = 1 << 4
+    snow = 1 << 5
+    water = 1 << 7
 
-    # Flags should be set to zero, indicating clear conditions
-    clear = (
-        qa.bitwiseAnd(cloud).eq(0)
+    # Retain only clear, snow-free land pixels
+    clear_land_pixels = (
+        qa.bitwiseAnd(fill).eq(0)
+          .And(qa.bitwiseAnd(dilated_cloud).eq(0))
+          .And(qa.bitwiseAnd(cirrus).eq(0))
+          .And(qa.bitwiseAnd(cloud).eq(0))
           .And(qa.bitwiseAnd(cloud_shadow).eq(0))
           .And(qa.bitwiseAnd(snow).eq(0))
           .And(qa.bitwiseAnd(water).eq(0))
     )
 
+    # Mask pixels with radiometric saturation in any band
+    unsaturated = ls_img.select("QA_RADSAT").eq(0)
+
     return (
-        ls_img.updateMask(clear)
+        ls_img.updateMask(clear_land_pixels)
+              .updateMask(unsaturated)
               .select([0])
               .copyProperties(ls_img, ["system:time_start"])
     )
