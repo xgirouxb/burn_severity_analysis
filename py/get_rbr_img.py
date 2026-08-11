@@ -1,28 +1,13 @@
 import ee
 
-# Helper: Scale optical band Digital Numbers (16-bit integers) to [0-1] range
+# Helper: Scale optical band Digital Numbers (16-bit integers) to surface
+#         reflectance using USGS scale factor and offset
 def scale_factor(ls_img):
     optical_bands = ls_img.select(["SR_B.*"]).multiply(0.0000275).add(-0.2)
     return ls_img.addBands(optical_bands, None, True)
 
-# Helper: Compute Normalized Burn Ratio (NBR) for any Landsat SR collections
-def compute_nbr(ls_img):
-    spacecraft_id = ee.String(ls_img.get('SPACECRAFT_ID'))
-    nir_band = ee.Algorithms.If(
-        spacecraft_id.match('LANDSAT_8|LANDSAT_9'),
-        'SR_B5',   # NIR band for LS8/9 
-        'SR_B4'    # NIR band for LS4/5/7
-    )
-    nbr = ls_img.normalizedDifference([nir_band, 'SR_B7']).toFloat()
-    qa = ls_img.select(['QA_PIXEL'])
-    return (
-        nbr.addBands([qa])
-           .select([0, 1], ['nbr', 'QA_PIXEL'])
-           .copyProperties(ls_img, ['system:time_start'])
-    )
-
-# Helper: Mask clear pixels in Landsat Collection 2 Level-2
-#         Surface Seflectance imagery for Landsat 4, 5, 7, 8, and 9.
+# Helper: Mask out bad pixels in Landsat Collection 2 Level-2 Tier 1
+#         Landsat 4, 5, 7, 8, and 9 Surface Reflectance
 def mask_clear_pixels(ls_img):
     
     # Get the pixel QA band
@@ -49,14 +34,69 @@ def mask_clear_pixels(ls_img):
           .And(qa.bitwiseAnd(water).eq(0))
     )
 
-    # Mask pixels with radiometric saturation in any band
-    unsaturated = ls_img.select("QA_RADSAT").eq(0)
-
     return (
         ls_img.updateMask(clear_land_pixels)
-              .updateMask(unsaturated)
-              .select([0])
               .copyProperties(ls_img, ["system:time_start"])
+    )
+
+# Helper: Mask pixels where either band used to calculate NBR is saturated
+def mask_nbr_saturation(ls_img):
+
+    # Get radiometric saturation QA band
+    radsat = ls_img.select("QA_RADSAT")
+
+    # Identify sensor
+    spacecraft_id = ee.String(ls_img.get("SPACECRAFT_ID"))
+
+    # NIR saturation bit:
+    #   Landsat 8/9: Band 5 -> bit 4
+    #   Landsat 4/5/7: Band 4 -> bit 3
+    nir_saturation_bit = ee.Number(
+        ee.Algorithms.If(
+            spacecraft_id.match("LANDSAT_8|LANDSAT_9"),
+            1 << 4,
+            1 << 3
+        )
+    )
+
+    # SWIR2 saturation bit:
+    #   Band 7 -> bit 6 for all sensors
+    swir2_saturation_bit = 1 << 6
+
+    # Retain pixels where both NIR and SWIR2 are unsaturated
+    nbr_bands_unsaturated = (
+        radsat.bitwiseAnd(nir_saturation_bit).eq(0)
+              .And(radsat.bitwiseAnd(swir2_saturation_bit).eq(0))
+    )
+
+    return (
+        ls_img.updateMask(nbr_bands_unsaturated)
+              .copyProperties(ls_img, ["system:time_start"])
+    )
+
+
+# Helper: Mask terrain-occluded pixels in Landsat 8 and 9
+#         QA_RADSAT bit 11 = terrain occlusion
+def mask_terrain_occlusion(ls_img):
+    radsat = ls_img.select("QA_RADSAT")
+    terrain_clear = radsat.bitwiseAnd(1 << 11).eq(0)
+    return (
+        ls_img.updateMask(terrain_clear)
+              .copyProperties(ls_img, ["system:time_start"])
+    )
+
+# Helper: Compute Normalized Burn Ratio (NBR) for any Landsat SR collections
+def compute_nbr(ls_img):
+    spacecraft_id = ee.String(ls_img.get('SPACECRAFT_ID'))
+    nir_band = ee.Algorithms.If(
+        spacecraft_id.match('LANDSAT_8|LANDSAT_9'),
+        'SR_B5',   # NIR band for LS8/9 
+        'SR_B4'    # NIR band for LS4/5/7
+    )
+    nbr = ls_img.normalizedDifference([nir_band, 'SR_B7']).toFloat()
+    return (
+        nbr.rename('nbr')
+           .copyProperties(ls_img, ['system:time_start'])
     )
 
 # Main function
@@ -90,11 +130,28 @@ def get_rbr_img(fire_polygon, start_day = 152, end_day = 245):
     ls4_sr = ee.ImageCollection('LANDSAT/LT04/C02/T1_L2')
     
     # Compute Normalized Burn Ratio for each collection and mask out clouds
-    ls9 = ls9_sr.map(scale_factor).map(compute_nbr).map(mask_clear_pixels)
-    ls8 = ls8_sr.map(scale_factor).map(compute_nbr).map(mask_clear_pixels)
-    ls7 = ls7_sr.map(scale_factor).map(compute_nbr).map(mask_clear_pixels)
-    ls5 = ls5_sr.map(scale_factor).map(compute_nbr).map(mask_clear_pixels)
-    ls4 = ls4_sr.map(scale_factor).map(compute_nbr).map(mask_clear_pixels)
+    ls9 = (ls9_sr.map(scale_factor)
+                 .map(mask_clear_pixels)
+                 .map(mask_nbr_saturation)
+                 .map(mask_terrain_occlusion)
+                 .map(compute_nbr))
+    ls8 = (ls8_sr.map(scale_factor)
+                 .map(mask_clear_pixels)
+                 .map(mask_nbr_saturation)
+                 .map(mask_terrain_occlusion)
+                 .map(compute_nbr))
+    ls7 = (ls7_sr.map(scale_factor)
+                 .map(mask_clear_pixels)
+                 .map(mask_nbr_saturation)
+                 .map(compute_nbr))
+    ls5 = (ls5_sr.map(scale_factor)
+                 .map(mask_clear_pixels)
+                 .map(mask_nbr_saturation)
+                 .map(compute_nbr))
+    ls4 = (ls4_sr.map(scale_factor)
+                 .map(mask_clear_pixels)
+                 .map(mask_nbr_saturation)
+                 .map(compute_nbr))
     
     # Merge collections
     ls_col = ee.ImageCollection(ls9.merge(ls8).merge(ls7).merge(ls5).merge(ls4))
@@ -117,7 +174,6 @@ def get_rbr_img(fire_polygon, start_day = 152, end_day = 245):
           .filter(ee.Filter.dayOfYear(start_day, end_day))
           .mean().rename('post_nbr')
     )
-    pre_post_fire_nbr = pre_fire_nbr.addBands(post_fire_nbr)
     
     # Calculate Relativized Burn Ratio
     rbr = (
