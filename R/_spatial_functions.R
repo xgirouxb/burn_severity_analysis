@@ -64,7 +64,7 @@ delete_holes <- function(sf_poly) {
   
   # Cast to MULTIPOLYGON 
   if (!all(sf::st_is(sf_poly, "MULTIPOLYGON"))) {
-    sf::st_cast(sf_poly, "MULTIPOLYGON")
+    sf_poly <- sf::st_cast(sf_poly, "MULTIPOLYGON")
   }
   
   # Split into list of polygons
