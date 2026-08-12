@@ -1,52 +1,82 @@
-#' Find buffer distance that doubles a polygon's area
+#' Find buffer distance required to reach a target polygon area
 #'
 #' @description
-#' This function calculates the approximate buffer distance required to 
-#' double the surface area of a given `sf` geometry. Starts with a reasonable
-#' ballpark based on relative size of input polygon uses `uniroot()` to find the
-#' buffer distance that minimizes the difference between geometry area and
-#' doubled area. 
+#' Calculates the buffer distance required for an `sf` polygon to reach a
+#' specified target area using `uniroot()`.
+#'
+#' If `target_area` is not supplied, the target defaults to twice the area of
+#' the input geometry.
 #'
 #' @param sf_poly An \code{sf} "POLYGON" or "MULTIPOLYGON" object.
-#' @param tolerance Numeric. The tolerance, or allowed difference, between input
-#'                           geometry area and the target area (i.e., double).
+#' @param target_area Numeric. Desired final polygon area. Defaults to twice the
+#' area of `sf_poly`.
+#' @param tolerance Numeric. Tolerance for the estimated buffer distance passed
+#' to \code{uniroot()}.
 #'
-#' @return A numeric value, the buffer distance required to double the . Returns 0 if 
-#' the input geometry has an area of 0.
-find_buffer_distance <- function(sf_poly, tolerance = 0.01) {
+#' @return Numeric. Buffer distance required to reach `target_area`.
+#'
+find_buffer_distance <- function(
+    sf_poly,
+    target_area = NULL,
+    tolerance = 0.01
+) {
   
-  # Input geometry area, return 0 if area is 0
+  # Current geometry area
   geom_area <- as.numeric(sf::st_area(sf_poly))
+  
+  # Return 0 for empty geometry
   if (geom_area == 0) return(0)
   
-  # Target is doubling the area of the polygon
-  target_area <- geom_area * 2
-  
-  # Get the diagonal of the bounding box as a proxy for polygon size
-  bbox <- sf::st_bbox(sf_poly)
-  width <- bbox["xmax"] - bbox["xmin"]
-  height <- bbox["ymax"] - bbox["ymin"]
-  diag <- as.numeric(sqrt(width^2 + height^2))
-  
-  # Fast guess upper bound as 1/20 of bbox diagonal
-  upper_bound <- diag * 0.05
-  
-  # Simplify polygon based on size of input geometry to speed up sf::st_buffer
-  geom_fast <- sf::st_simplify(sf_poly, dTolerance = diag * 0.01) %>% 
-    sf::st_geometry()
-  
-  # Define function to minimize: difference between current and target area
-  area_diff <- function(dist) {
-    as.numeric(sf::st_area(sf::st_buffer(geom_fast, dist = dist))) - target_area
+  # Default target is twice the input geometry area
+  if (is.null(target_area)) {
+    target_area <- geom_area * 2
   }
   
-  # Expand upper bound if buffer distance is too small to double area 
-  while (area_diff(upper_bound) < 0) { upper_bound <- upper_bound * 2 }
+  # A positive buffer cannot reduce polygon area
+  if (geom_area > target_area) {
+    stop(
+      "Input polygon area already exceeds `target_area`; ",
+      "the requested area cannot be reached with a positive buffer."
+    )
+  }
   
-  # Search for buffer distance that doubles geometry area
-  result <- uniroot(area_diff, lower = 0, upper = upper_bound, tol = tolerance)
+  # No buffer required if already at target
+  if (geom_area == target_area) return(0)
   
-  # Return buffer distance that is within tolerance
+  # Get bounding-box diagonal as a proxy for polygon size
+  bbox <- sf::st_bbox(sf_poly)
+  
+  width <- bbox["xmax"] - bbox["xmin"]
+  height <- bbox["ymax"] - bbox["ymin"]
+  
+  diag <- as.numeric(sqrt(width^2 + height^2))
+  
+  # Initial upper bound
+  upper_bound <- diag * 0.05
+  
+  # Difference between buffered area and desired target area
+  area_diff <- function(dist) {
+    as.numeric(
+      sf::st_area(
+        sf::st_buffer(sf_poly, dist = dist)
+      )
+    ) - target_area
+  }
+  
+  # Expand upper bound until the target area is bracketed
+  while (area_diff(upper_bound) < 0) {
+    upper_bound <- upper_bound * 2
+  }
+  
+  # Find buffer distance that reaches target area
+  result <- uniroot(
+    area_diff,
+    lower = 0,
+    upper = upper_bound,
+    tol = tolerance
+  )
+  
+  # Return
   return(result$root)
 }
 

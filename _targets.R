@@ -53,7 +53,10 @@ list(
   # Define sampling area for study fires (include buffer and skips/refugia)
   tar_target(
     name = sampling_polygons,
-    command = define_sampling_polygons(study_fire_polygons)
+    command = define_sampling_polygons(
+      study_fire_polygons,
+      n_workers = max(1L, round(parallelly::availableCores() * 0.5))
+    )
   ),
   # Define study fire sampling points
   tar_target(
