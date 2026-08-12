@@ -14,6 +14,13 @@ options(timeout = max(1000, getOption("timeout")))
 # (suppresses warnings when passing large objects to parallel workers)
 options('future.globals.maxSize' = 3 * 1024^3)
 
+# Set default OpenBLAS threads to avoid conflicts with {future}
+Sys.setenv(
+  OPENBLAS_NUM_THREADS = 1,
+  OMP_NUM_THREADS = 1,
+  MKL_NUM_THREADS = 1
+)
+
 # Define and set to miniforge conda env for reticulate
 # see https://rstudio.github.io/reticulate/articles/versions.html
 env_name <- "python-gee"
