@@ -122,6 +122,11 @@ get_burn_severity_rasters <- function(sampling_polygons) {
     dplyr::mutate(fire_id = fs::path_ext_remove(fs::path_file(local_path))) %>% 
     dplyr::select(fire_id, raster_file_path = local_path)
   
+  # Add the time this target completed as an attribute
+  # NB Ensures downstream targets are invalidated whenever
+  # the RBR rasters are regenerated, even if file paths are unchanged
+  attr(rbr_raster_paths, "rbr_updated_at") <- Sys.time()
+  
   # Return list of RBR raster file paths
   return(rbr_raster_paths)
 }

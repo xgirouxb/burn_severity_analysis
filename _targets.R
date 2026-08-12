@@ -96,13 +96,19 @@ list(
   # -------------------------------------------------------------------------- #
   # 3. Prepare response variable - burn severity
   # -------------------------------------------------------------------------- #
-
+  
+  # Set GEE python script for RBR as dependency to track code changes
+  # NB {targets} does not auto track .py files
+  tar_target(
+    name = rbr_python_script,
+    command = "py/get_rbr_img.py",
+    format = "file"
+  ),
   #  Import Relativized Burn Ratio images computed via Google Earth Engine API
   tar_target(
     name = burn_severity_rasters,
-    command = get_burn_severity_rasters(sampling_polygons)
+    command = {rbr_python_script; get_burn_severity_rasters(sampling_polygons)}
   ),
-
   # -------------------------------------------------------------------------- #
   # 4. Top-down fire weather covariates
   # -------------------------------------------------------------------------- #
