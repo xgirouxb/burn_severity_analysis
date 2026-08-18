@@ -189,34 +189,37 @@ prep_forestry_disturbance_rasters <- function(
         # -------------------------------------------------------------------- #
         # Step 3: Update harvested and planted areas ####
         
-        # Update harvest where a plantation or fire follows
+        # Identify pixels where fire occurred after harvest OR 
+        disturbed_post_harvest <- (harvested_raster < burned_raster) |
+          # Where planting occurred after harvest (within 5 years)
+          (harvested_raster < (planted_raster + 5))
+        # Update harvest where if there is a more recent fire or planting
         updated_harvested_raster <- terra::ifel(
-          # Mask where fire occurred after harvest OR 
-          test = (harvested_raster < burned_raster) | 
-            # Mask where planting occurred after harvest
-            (harvested_raster < (planted_raster + 5)),
+          # Mask where fire or planting occurred after harvest 
+          test = disturbed_post_harvest & 
+            # NAs fallback to FALSE
+            !is.na(disturbed_post_harvest),
           yes = NA,
           no = harvested_raster
         )
         names(updated_harvested_raster) <- "harvest_year"
         
-        # Update planted areas if most recent disturbance is fire or harvest
+        # Identify pixels where fire occurred after planting OR
+        disturbed_post_planting <- (planted_raster < burned_raster) | 
+          # Where harvest occurs more than 5 years after planting
+          (harvested_raster > (planted_raster + 5))
+        # Update planted areas if there is a more recent fire or harvest
         updated_planted_raster <- terra::ifel(
-          # Mask where fire occurred after planting OR 
-          test = (planted_raster < burned_raster) | 
-            # Mask where harvest occurred more than 5 years after planting
-            (harvested_raster > (planted_raster + 5)),
+          # Mask where fire or harvest occurred after planting
+          test = disturbed_post_planting & !is.na(disturbed_post_planting),
           yes = NA,
           no = planted_raster
         )
         names(updated_planted_raster) <- "res_planting_year"
-        
         # Update planted species if most recent disturbance is fire or harvest
         updated_planted_spp_raster <- terra::ifel(
-          # Mask where fire occurred after planting OR 
-          test = (planted_raster < burned_raster) | 
-            # Mask where harvest occurred more than 5 years after planting
-            (harvested_raster > (planted_raster + 5)),
+          # Mask where fire or harvest occurred after planting
+          test = disturbed_post_planting & !is.na(disturbed_post_planting),
           yes = NA,
           no = planted_spp_raster
         )
@@ -362,6 +365,11 @@ prep_forestry_disturbance_rasters <- function(
     ) %>%
     # Combine
     dplyr::bind_rows()
+  
+  # Add the time this target completed as an attribute
+  # NB Ensures downstream targets are invalidated whenever
+  # the disturbance rasters are regenerated, even if file paths are unchanged
+  attr(forestry_disturbance_paths, "fd_updated_at") <- Sys.time()
   
   # Return list of forestry disturbance raster file paths
   return(forestry_disturbance_paths)
