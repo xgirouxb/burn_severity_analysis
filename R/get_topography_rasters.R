@@ -90,14 +90,19 @@ get_topography_rasters <- function(sampling_polygons, n_workers = NULL) {
           raster_file_path = raster_file_path
         )
       },
-      # Schedule one task at a time
-      .options = furrr::furrr_options(scheduling = Inf)
+      # Set seed in each parallel process, schedule one task at a time
+      .options = furrr::furrr_options(seed = 42, scheduling = Inf)
     ) %>%
     # Combine
     dplyr::bind_rows()
   
   # Close parallel processing if n_workers is supplied
   if(!is.null(n_workers)) { future::plan(strategy = "future::sequential") }
+  
+  # Add the time this target completed as an attribute
+  # NB Ensures downstream targets are invalidated whenever
+  # the topography rasters are regenerated, even if file paths are unchanged
+  attr(topography_raster_paths, "topo_updated_at") <- Sys.time()
   
   # Return list of topography raster file paths
   return(topography_raster_paths)
