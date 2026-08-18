@@ -242,6 +242,11 @@ get_fire_weather_rasters <- function(
   # Close parallel processing if n_workers is supplied
   if(!is.null(n_workers)) { future::plan(strategy = "future::sequential") }
   
+  # Add the time this target completed as an attribute
+  # NB Ensures downstream targets are invalidated whenever
+  # the fire weather rasters are regenerated, even if file paths are unchanged
+  attr(fire_weather_raster_paths, "wx_updated_at") <- Sys.time()
+  
   # Return list of fire weather raster file paths
   return(fire_weather_raster_paths)
 }
