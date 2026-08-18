@@ -313,13 +313,13 @@ compute_pdir <- function(x) {
   # Compute slope
   slope <- terra::terrain(x = x, v = "slope", unit = "radians")
   
-  # Compute latitude in degrees (agnostic to input CRS)
+  # Compute latitude in degrees (agnostic to input CRS) using NAD83
   latitude_deg <- terra::setValues(
     x = x,
     values = terra::project(
       x = terra::crds(x, na.rm = FALSE),
       from = terra::crs(x),
-      to = "EPSG:4326"
+      to = "EPSG:4269" 
     )[,2]
   ) * mask
   
