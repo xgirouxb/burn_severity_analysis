@@ -84,6 +84,11 @@ get_ccfm_forest_tenure_rasters <- function(sampling_polygons) {
     # Convert list to tibble
     purrr::list_rbind()
   
+  # Add the time this target completed as an attribute
+  # NB Ensures downstream targets are invalidated whenever
+  # the CCFM rasters are regenerated, even if file paths are unchanged
+  attr(ccfm_tenure_paths, "ccfm_updated_at") <- Sys.time()
+  
   # Return list of CCFM forest tenure raster file names
   return(ccfm_tenure_paths)
 }
