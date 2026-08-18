@@ -39,7 +39,7 @@ sample_forest_variables <- function(
     # Nest by study fire
     dplyr::group_nest(fire_id) %>% 
     # Join table of burn severity raster file paths
-    dplyr::left_join(fire_weather_rasters, by = "fire_id") %>% 
+    dplyr::left_join(y = fire_weather_rasters, by = "fire_id") %>% 
     # Sample fire weather rasters
     dplyr::mutate(pts = purrr::map2(raster_file_path, data, sample_raster)) %>%
     # Unnest and clean-up
@@ -84,7 +84,8 @@ sample_forest_variables <- function(
       by = c("id", "fire_id", "fire_year")
     ) %>% 
     # Clean up
-    dplyr::select(-vri_feature_id)
+    dplyr::select(-fire_id, -fire_year, -burned, -vri_feature_id) %>% 
+    sf::st_drop_geometry()
   
   # -------------------------------------------------------------------------- #
   # Step 4: Sample forest disturbances                                      ####
@@ -144,7 +145,6 @@ sample_forest_variables <- function(
     # Spatially join RESULTS attributes to sample points within each study fire
     purrr::map(
       function(study_fire_samples) {
-        
         # Get study fire attributes
         study_fire_id <- unique(study_fire_samples$fire_id)
         study_fire_year <- unique(study_fire_samples$fire_year)
@@ -351,7 +351,9 @@ sample_forest_variables <- function(
   # Step 9: Join forest vegetation/disturbances and biogeo ####
     
   # Join sampled vegetation and disturbance data
-  joined_forest_variables <- sampled_burn_severity %>% 
+  joined_forest_variables <- sampling_points %>% 
+    # Left-join response variables
+    dplyr::left_join(sampled_burn_severity, by = "id") %>%
     # Left-join fire weather covariates
     dplyr::left_join(sampled_fire_weather, by = "id") %>% 
     # Left-join vegetation attributes
