@@ -167,18 +167,33 @@ list(
       vri_lyr_name = "LYR_D"
     )
   ),
-  # Import land cover classes sampled via Google Earth Engine Python API
+  # Set GEE python script for NTEMS classes as dependency to track code changes
+  # NB {targets} does not auto track .py files
+  tar_target(
+    name = ntems_python_script,
+    command = "py/get_ntems_lc_classes.py",
+    format = "file"
+  ),
+  # Launch NTEMS land cover classes sampling tasks via Earth Engine Python API
   # see JavaScript equivalent:
   # https://code.earthengine.google.com/d78997162f4707f78ba8ad0f36572e31
   tar_target(
+    name = ntems_land_cover_gee_tasks,
+    command = {
+      ntems_python_script
+      launch_ntems_land_cover_gee_tasks(
+        sampling_points,
+        # Supply vector of neighbourhood radii to compute land cover proportions
+        neighbourhood_radius = c(100, 500, 1000)
+      )
+    }
+  ), 
+  # Import NTEMS land cover classes sampled via Earth Engine Python API
+  tar_target(
     name = ntems_land_cover_class_tbl,
-    command = get_ntems_land_cover_class_tbl(
-      sampling_points,
-      # Supply vector of neighbourhood radii to compute land cover proportions
-      neighbourhood_radius = c(100, 500, 1000)
-    )
+    command = get_ntems_land_cover_class_tbl(ntems_land_cover_gee_tasks)
   ),
-
+  
   # -------------------------------------------------------------------------- #
   # 7. Bottom-up vegetation disturbance covariates
   # -------------------------------------------------------------------------- #
