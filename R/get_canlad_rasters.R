@@ -113,6 +113,11 @@ get_canlad_disturbance_rasters <- function(sampling_polygons) {
     # Convert list to tibble
     purrr::list_rbind()
   
+  # Add the time this target completed as an attribute
+  # NB Ensures downstream targets are invalidated whenever
+  # the canlad rasters are regenerated, even if file paths are unchanged
+  attr(canlad_disturbance_paths, "canlad_updated_at") <- Sys.time()
+  
   # Return list of CanLaD disturbance raster file names
   return(canlad_disturbance_paths)
 }
@@ -214,6 +219,11 @@ get_precanlad_disturbance_rasters <- function(sampling_polygons) {
     ) %>% 
     # Convert list to tibble
     purrr::list_rbind()
+  
+  # Add the time this target completed as an attribute
+  # NB Ensures downstream targets are invalidated whenever
+  # the precanlad rasters are regenerated, even if file paths are unchanged
+  attr(precanlad_disturbance_paths, "precanlad_updated_at") <- Sys.time()
   
   # Return list of pre-CanLaD disturbance raster file names
   return(precanlad_disturbance_paths)
