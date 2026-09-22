@@ -5,10 +5,11 @@ get_canlad_disturbance_rasters <- function(sampling_polygons) {
   
   # Define local cache directory for CanLaD rasters, create if it doesn't exist
   canlad_cache <- fs::dir_create("data/_cache/canlad")
-  raw_canlad_cache <- fs::dir_create("data/_cache/canlad/raw")
+  raw_canlad_cache <- fs::dir_create("data/_cache/canlad/raw/v1_1_20260508")
   
   # Get URLs for CanLaD rasters to cache locally
-  raster_urls <- get_url_list(url_canlad_1985_2024) %>%
+  raster_urls <- get_url_list(url_canlad_1985_2025) %>%
+    stringr::str_subset("\\.tif$") %>%
     stringr::str_subset(paste(canlad_years, collapse = "|"))
   
   # Create CanLaD raster file paths for local cache
