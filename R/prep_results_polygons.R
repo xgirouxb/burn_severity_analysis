@@ -240,10 +240,10 @@ prep_results_polygons <- function(
       ),
       # Flag remaining NAs, everything that is TRUE needs sanity check
       inspect_na_flag = if_else(is.na(res_planting_year), TRUE, FALSE),
-      # Remove if plantation year is same year as or after study fire year
+      # Remove if not flagged as planted or year is not before study fire
       # (these NAs do not require inspection sanity check)
       res_planting_year = dplyr::if_else(
-        res_planting_year >= fire_year,
+        !is_planted | res_planting_year >= fire_year,
         NA_integer_,
         res_planting_year
       )
