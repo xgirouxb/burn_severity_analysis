@@ -205,6 +205,7 @@ get_precanlad_disturbance_rasters <- function(sampling_polygons) {
           x = terra::project(
             x = c(precanlad_fire_year, precanlad_harvest_year),
             y = study_proj,
+            method = "near",
             res = 30
           ),
           filename = raster_file_path,
