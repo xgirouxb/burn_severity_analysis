@@ -88,6 +88,12 @@ uuid_results_plantings <- "3666c26a-32d8-43e4-b8ad-59a315c7d3ce"
 uuid_bc_cutblocks <- "b1b647a6-f271-42e0-9cd0-89ec24bce9f7"
 
 # ---------------------------------------------------------------------------- #
+# British Columbia Cumulative Effects Framework - Integrated Roads
+# Metadata available at: https://catalogue.data.gov.bc.ca/dataset/bc-cumulative-effects-framework-integrated-roads-current
+# Dataset UUID can be found using bcdata::bcdc_search("integrated roads")
+uuid_cef_roads <- "a489bc6a-f676-4503-8cd7-dcf0bdf2ae99"
+
+# ---------------------------------------------------------------------------- #
 # Canada high-resolution annual forest land cover
 # Metadata available at: https://gee-community-catalog.org/projects/ca_lc/
 # Publication for methodology: https://doi.org/10.1016/j.rse.2021.112780

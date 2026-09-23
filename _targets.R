@@ -228,6 +228,14 @@ list(
     name = results_plantings_polygons,
     command = get_results_plantings_polygons(results_openings_polygons)
   ),
+  # Import CEF integrated road lines database
+  tar_target(
+    name = cef_road_lines,
+    command = get_cef_integrated_roads(
+      sampling_polygons,
+      n_workers = max(1L, round(parallelly::availableCores() * 0.5))
+    )
+  ),
   # Import CCFM forest tenure rasters
   tar_target(
     name = ccfm_tenure_rasters,
@@ -265,6 +273,15 @@ list(
       historical_fire_polygons,
       results_polygons,
       vri_species_key
+    )
+  ),
+  # Prepare road density rasters
+  tar_target(
+    name = cef_road_rasters,
+    command = prep_cef_road_rasters(
+      cef_road_lines,
+      sampling_polygons,
+      n_workers = max(1L, round(parallelly::availableCores() * 0.2))
     )
   ),
   # Find samples with disturbances that may interfere with burn ratios
