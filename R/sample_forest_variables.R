@@ -3,6 +3,7 @@ sample_forest_variables <- function(
     biased_burn_ratio_sample_ids,
     burn_severity_rasters,
     fire_weather_rasters,
+    topography_rasters,
     vri_polygons,
     ntems_land_cover_class_tbl,
     cutblock_polygons,
@@ -11,8 +12,8 @@ sample_forest_variables <- function(
     canlad_disturbance_rasters,
     precanlad_disturbance_rasters,
     forestry_disturbance_rasters,
+    cef_road_rasters,
     ccfm_tenure_rasters,
-    topography_rasters,
     vegetation_zone_polygons,
     biogeoclimatic_zone_polygons,
     biogeoclimatic_zone_groups_polygons,
@@ -20,7 +21,7 @@ sample_forest_variables <- function(
 ) {
   
   # -------------------------------------------------------------------------- #
-  # Step 1: Sample burn severity response variable: RBR                     ####
+  # Step 1: Sample burn severity response variable: RBR ####
   sampled_burn_severity <- sampling_points %>%
     # Nest by study fire
     dplyr::group_nest(fire_id) %>% 
@@ -34,7 +35,7 @@ sample_forest_variables <- function(
     dplyr::select(-fire_year, -burned)
 
   # -------------------------------------------------------------------------- #
-  # Step 2: Sample fire weather variables  ####
+  # Step 2: Sample fire weather variables ####
   sampled_fire_weather <- sampling_points %>%
     # Nest by study fire
     dplyr::group_nest(fire_id) %>% 
@@ -48,7 +49,23 @@ sample_forest_variables <- function(
     dplyr::select(-fire_year, -burned, -dem, -slope, -aspect)
   
   # -------------------------------------------------------------------------- #
-  # Step 3: Sample forest vegetation: VRI archive + land cover images       ####
+  # Step 3: Sample topographic metrics ####
+  
+  # Sample topographic metrics 
+  sampled_topo_metrics <- sampling_points %>%
+    # Nest by study fire
+    dplyr::group_nest(fire_id) %>% 
+    # Join table of topography raster file names
+    dplyr::left_join(topography_rasters, by = "fire_id") %>% 
+    # Sample topography rasters
+    dplyr::mutate(pts = purrr::map2(raster_file_path, data, sample_raster)) %>% 
+    # Unnest and clean-up
+    dplyr::select(pts) %>% 
+    tidyr::unnest(cols = c(pts)) %>% 
+    dplyr::select(-fire_year, -burned)
+  
+  # -------------------------------------------------------------------------- #
+  # Step 4: Sample forest vegetation: VRI archive + NTEMS LC classes ####
   sampled_vegetation <- sampling_points %>%
     # Nest samples by fire id
     # (as some VRI polygons might intersect points with mismatched years)
@@ -88,9 +105,9 @@ sample_forest_variables <- function(
     sf::st_drop_geometry()
   
   # -------------------------------------------------------------------------- #
-  # Step 4: Sample forest disturbances                                      ####
+  # Step 5: Sample forest disturbances ####
   
-  ## 4.1 Sample cutblock polygon attributes ####
+  ## 5.1 Sample cutblock polygon attributes ####
   sampled_cutblocks <- sampling_points %>%
     # Spatial inner join cutblocks that intersect sample points
     sf::st_join(y = cutblock_polygons, left = FALSE) %>%
@@ -119,7 +136,7 @@ sample_forest_variables <- function(
     dplyr::select(id, cc_harvest_year, cc_harvest_start_year,
                   cc_harvest_end_year, cc_years_since_harvest)
   
-  ## 4.2 Sample historical fire polygon attributes ####
+  ## 5.2 Sample historical fire polygon attributes ####
   sampled_historical_fires <- sampling_points %>%
     # Spatial inner join fires that intersect sample points
     sf::st_join(y = historical_fire_polygons, left = FALSE) %>%
@@ -137,7 +154,7 @@ sample_forest_variables <- function(
     # Clean-up
     dplyr::select(id, hf_fire_year, hf_years_since_fire)
   
-  ## 4.3 Sample harvest/fire/plantations in RESULTS polygons ####
+  ## 5.3 Sample harvest/fire/plantations in RESULTS polygons ####
   sampled_results <- sampling_points %>%
     # Nest samples by fire id
     # (as some RESULTS polygons might intersect points with mismatched years)
@@ -206,7 +223,7 @@ sample_forest_variables <- function(
     # Clean up
     dplyr::select(-fire_year)
     
-  ## 4.4 Sample CanLaD harvest (1985-2020) and fire disturbances ####
+  ## 5.4 Sample CanLaD harvest (1985-2020) and fire disturbances ####
   sampled_canlad_disturbances <- sampling_points %>%
     # Nest by study fire
     dplyr::group_nest(fire_id) %>% 
@@ -219,7 +236,7 @@ sample_forest_variables <- function(
     tidyr::unnest(cols = c(pts)) %>% 
     dplyr::select(-burned)
 
-  ## 4.5 Sample pre-CanLaD (1964-1984) harvest and fire disturbances ####
+  ## 5.5 Sample pre-CanLaD (1964-1984) harvest and fire disturbances ####
   sampled_precanlad_disturbances <- sampling_points %>%
     # Nest by study fire
     dplyr::group_nest(fire_id) %>% 
@@ -232,7 +249,7 @@ sample_forest_variables <- function(
     tidyr::unnest(cols = c(pts)) %>% 
     dplyr::select(-fire_year, -burned)
     
-  ## 4.6 Combined CanLaD and pre-CanLaD disturbance years ####
+  ## 5.6 Combined CanLaD and pre-CanLaD disturbance years ####
   sampled_combined_canlad_disturbances <- dplyr::left_join(
     sampled_canlad_disturbances,
     sampled_precanlad_disturbances,
@@ -257,25 +274,9 @@ sample_forest_variables <- function(
       id, canlad_fire_year, canlad_years_since_fire,
       canlad_harvest_year, canlad_years_since_harvest
     )
-
-  # -------------------------------------------------------------------------- #
-  # Step 5: Sample CCFM forest tenure classes from rasters                  ####
-  
-  # Sample CCFM forest tenure types
-  sampled_ccfm_forest_tenure <- sampling_points %>%
-    # Nest by study fire
-    dplyr::group_nest(fire_id) %>% 
-    # Join table of CCFM forest tenure classes raster file names
-    dplyr::left_join(ccfm_tenure_rasters, by = "fire_id") %>% 
-    # Sample forest tenure rasters
-    dplyr::mutate(pts = purrr::map2(raster_file_path, data, sample_raster)) %>% 
-    # Unnest and clean-up
-    dplyr::select(pts) %>% 
-    tidyr::unnest(cols = c(pts)) %>% 
-    dplyr::select(-fire_year, -burned)
   
   # -------------------------------------------------------------------------- #
-  # Step 6: Sample forestry disturbances from rasters                       ####  
+  # Step 6: Sample forestry disturbances from rasters ####  
   
   # Sample forestry disturbances
   sampled_forestry_disturbances <- sampling_points %>%
@@ -301,15 +302,15 @@ sample_forest_variables <- function(
     )
   
   # -------------------------------------------------------------------------- #
-  # Step 7: Sample topographic metrics ####
+  # Step 7: Sample road distance and density ####
   
-  # Sample topographic metrics 
-  sampled_topo_metrics <- sampling_points %>%
+  # Sample road distance/density 
+  sampled_road_distance_density <- sampling_points %>%
     # Nest by study fire
     dplyr::group_nest(fire_id) %>% 
-    # Join table of topography raster file names
-    dplyr::left_join(topography_rasters, by = "fire_id") %>% 
-    # Sample topography rasters
+    # Join table of road distance/density raster file names
+    dplyr::left_join(cef_road_rasters, by = "fire_id") %>% 
+    # Sample road distance/density rasters
     dplyr::mutate(pts = purrr::map2(raster_file_path, data, sample_raster)) %>% 
     # Unnest and clean-up
     dplyr::select(pts) %>% 
@@ -317,7 +318,23 @@ sample_forest_variables <- function(
     dplyr::select(-fire_year, -burned)
   
   # -------------------------------------------------------------------------- #
-  # Step 8: Sample biogeo/vegetation/fire zones  ####
+  # Step 8: Sample CCFM forest tenure classes from rasters ####
+  
+  # Sample CCFM forest tenure types
+  sampled_ccfm_forest_tenure <- sampling_points %>%
+    # Nest by study fire
+    dplyr::group_nest(fire_id) %>% 
+    # Join table of CCFM forest tenure classes raster file names
+    dplyr::left_join(ccfm_tenure_rasters, by = "fire_id") %>% 
+    # Sample forest tenure rasters
+    dplyr::mutate(pts = purrr::map2(raster_file_path, data, sample_raster)) %>% 
+    # Unnest and clean-up
+    dplyr::select(pts) %>% 
+    tidyr::unnest(cols = c(pts)) %>% 
+    dplyr::select(-fire_year, -burned)
+  
+  # -------------------------------------------------------------------------- #
+  # Step 9: Sample biogeo/vegetation/fire zones  ####
   sampled_biogeo_veg_zones <- sampling_points %>% 
     # Spatial join vegetation zone polygons that intersect samples
     sf::st_join(y = vegetation_zone_polygons) %>%
@@ -348,7 +365,7 @@ sample_forest_variables <- function(
     )
 
   # -------------------------------------------------------------------------- #
-  # Step 9: Join forest vegetation/disturbances and biogeo ####
+  # Step 10: Join all sampled variables ####
     
   # Join sampled vegetation and disturbance data
   joined_forest_variables <- sampling_points %>% 
@@ -370,13 +387,15 @@ sample_forest_variables <- function(
     dplyr::left_join(sampled_ccfm_forest_tenure, by = "id") %>% 
     # Left-join forestry disturbances
     dplyr::left_join(sampled_forestry_disturbances, by = "id") %>% 
+    # Left-join road distance/density
+    dplyr::left_join(sampled_road_distance_density, by = "id") %>%
     # Left-join topographic data 
     dplyr::left_join(sampled_topo_metrics, by = "id") %>% 
     # Left-join biogeo attributes
     dplyr::left_join(sampled_biogeo_veg_zones, by = "id")
   
   # -------------------------------------------------------------------------- #
-  # Step 10: Remove samples with potentially biased burn ratios, return ####
+  # Step 11: Remove samples with potentially biased burn ratios, return ####
   
   # Samples with disturbances 1 year prior, 1 year after or same year as fire
   # will have biased burn ratios because it may accentuate image differencing
