@@ -365,3 +365,86 @@ sample_raster <- function(raster_file_path, sf_points) {
   ) %>%
     tibble::as_tibble()
 }
+
+#' Compute a line density raster
+#'
+#' Produces a raster of line densities in the the circular neighbourhood around each cell.
+#'
+#' @param sf_lines An \code{sf} "LINESTRING" object from which to compute density.
+#' @param sf_aoi An \code{sf} "POLYGON" defining the area of interest.
+#' @param radius An integer, the radius in metres of the circular neighbourhood.
+#' @param template A \code{SpatRaster} to use as a template for output raster.
+#'
+#' @return A terra \code{SpatRaster} of line density (m/km^2).
+#'
+line_density <- function(sf_lines, sf_aoi, radius, template) {
+  
+  # Stop function if projections are mismatched
+  if(sf::st_crs(sf_lines) != sf::st_crs(sf_aoi)) {
+    stop("st_crs(sf_lines) == st_crs(sfc_aoi) is not TRUE")
+  }
+  
+  # Stop function if units aren't in metres
+  if(sf::st_crs(sf_lines)$units != "m") {
+    stop("CRS units must be metres")
+  }
+  
+  # If sf_lines is empty, return 0 density raster
+  if(nrow(sf_lines) == 0) { 
+    
+    # Crop raster of 0s to study area
+    output_raster <- terra::crop(
+      x = terra::subst(template, 1, 0),
+      y = terra::vect(sf_aoi),
+      mask = TRUE
+    )
+    
+    # Return
+    return (output_raster)
+  }                      
+  
+  # Compute length of sf_lines through each pixel, in m
+  rast_line_length_m <- terra::rasterizeGeom(
+    x = terra::vect(sf_lines),
+    y = template,
+    fun = "length",
+    unit = "m"
+  )
+  
+  # Replace NAs with 0 and mask to template
+  rast_line_length_m <- terra::subst(rast_line_length_m, NA, 0) * template
+  
+  # Define a circular neighbourhood window with supplied radius
+  neighbourhood_window <- terra::focalMat(
+    x = rast_line_length_m,
+    d = radius,
+    type = "circle"
+  )
+  
+  # Replace weights by 1 (to count n cells with an intersecting)
+  neighbourhood_window[neighbourhood_window > 0] <- 1
+  
+  # Compute total length of lines within distance "radius" of cell, in m
+  neighbourhood_line_length_m <- terra::focal(
+    x = rast_line_length_m, 
+    w = neighbourhood_window, 
+    fun = "sum",
+    na.rm = TRUE
+  )
+  
+  # Compute area of circular neighbourhood, in square km
+  neighbourhood_area_km2 <- round((pi*radius^2)/10^6, 4)
+  
+  # Compute line density in m/km2
+  output_raster <- neighbourhood_line_length_m/neighbourhood_area_km2
+  
+  # Crop to aoi
+  output_raster <- terra::crop(
+    x = output_raster,
+    y = terra::vect(sf_aoi),
+    mask = TRUE
+  )
+  
+  # Return {terra} SpatRaster
+  return(output_raster)
+}
