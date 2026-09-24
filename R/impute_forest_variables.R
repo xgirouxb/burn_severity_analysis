@@ -1,4 +1,8 @@
-impute_forest_variables <- function(forest_variables, vri_species_key){
+impute_forest_variables <- function(
+    forest_variables,
+    vri_species_key,
+    n_workers = NULL
+){
 
   # -------------------------------------------------------------------------- #
   # Step 1: Consolidate stand age/spp from VRI, CC, HF, CanLaD and RESULTS ####
@@ -190,10 +194,10 @@ impute_forest_variables <- function(forest_variables, vri_species_key){
   )
   
   # List distance to managed landscapes, only for prediction
-  managed_distance <- c("planted_distance", "harvested_distance")
+  managed_distance <- c("managed_distance")
   
   # List biogeographical categorical variables we want to use for prediction
-  biogeo_cat_vars <- c("cvz", "bec", "frt")
+  biogeo_cat_vars <- c("bec")
   
   # List topographic numerical variables we want to use for prediction
   topo_num_vars <- c(
@@ -245,19 +249,46 @@ impute_forest_variables <- function(forest_variables, vri_species_key){
   # Create predictor matrix
   mice_pred_mat <- mice::make.predictorMatrix(imputation_tbl)
   
-  # Remove ID variables from the predictor matrix (not to be used for imputation)
-  mice_pred_mat[, vri_id_vars] <- 0  
+  # Remove ID variables from predictor matrix
+  mice_pred_mat[, vri_id_vars] <- 0
   
-  # Imputation
-  imputed_forest_variables <- mice::mice(
+  # Sample 60% of observations within each study fire for model training
+  mice_training_rows <- withr::with_seed(
+    42,
+    imputation_tbl %>%
+      dplyr::mutate(.row = dplyr::row_number()) %>%
+      dplyr::group_by(fire_id) %>%
+      dplyr::slice_sample(prop = 0.6) %>%
+      dplyr::pull(.row)
+  )
+  
+  # Exclude remaining rows from model fitting, but still impute them
+  mice_ignore <- !seq_len(nrow(imputation_tbl)) %in% mice_training_rows
+  
+  # Setup core/thread balance based on number of workers
+  if(!is_null(n_workers)) {
+    n_core <- min(5, max(1, floor(n_workers / 4)))
+    n_thread <- max(1, floor(n_workers * 1.25 / n_core))
+  } else {
+    n_core <- 1
+    n_thread <- 1
+  }
+  
+  # Impute using five parallel chains and multithreaded literanger
+  imputed_forest_variables <- mice::futuremice(
     data = imputation_tbl,
     m = 5,
     method = "rf",
     rfPackage = "literanger",
     predictorMatrix = mice_pred_mat,
+    ignore = mice_ignore,
     ntree = 10,
-    maxit = 50,
-    seed = 42,
+    maxit = 25,
+    n.core = n_core,
+    n_thread = n_thread,
+    parallelseed = 42,
+    future.plan = "multisession",
+    packages = "literanger"
   )
   
   # Return mice object

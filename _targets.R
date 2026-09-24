@@ -329,6 +329,10 @@ list(
   # Reclassify/impute VRI variables
   tar_target(
     name = imputed_forest_variables,
-    command = impute_forest_variables(forest_variables, vri_species_key)
+    command = impute_forest_variables(
+      forest_variables,
+      vri_species_key,
+      n_workers = parallelly::availableCores(logical = FALSE)
+    )
   )
 )
